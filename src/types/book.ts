@@ -3,9 +3,10 @@ export interface Book {
     title: string;
     authors: string[];
     description: string | null;
-    converUrl: string | null;
+    coverUrl: string | null;
     pageCount: number | null;
     publishedDate: string | null;
     isbn: string | null;
+    categories: string[];
     averageRating: number | null;
 }
