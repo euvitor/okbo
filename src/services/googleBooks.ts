@@ -23,7 +23,18 @@ export function adaptGoogleBook(item: GoogleBooksVolume): Book {
 }
 
 export async function searchBooks(query: string): Promise<Book[]> {
-    const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}`)
+    const apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY
+
+    if (!apiKey || typeof apiKey !== 'string') {
+        throw new Error('Defina VITE_GOOGLE_BOOKS_API_KEY no .env')
+    }
+
+    const params = new URLSearchParams({
+        q: query,
+        key: apiKey
+    })
+
+    const response = await fetch(`https://www.googleapis.com/books/v1/volumes?${params.toString()}`)
 
     if (!response.ok) throw new Error("Erro ao buscar livros")
 
