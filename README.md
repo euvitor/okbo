@@ -1,73 +1,79 @@
-# React + TypeScript + Vite
+# okbo.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> bookfinder + bookshelf — find books, save your reads.
 
-Currently, two official plugins are available:
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=black) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat&logo=tailwindcss&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat&logo=vite&logoColor=white)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## About
 
-## React Compiler
+**okbo** is a web app for searching and discovering books using the Google Books API. The goal is to evolve into a personal bookshelf — where you can track what you've read, are reading, or want to read.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The project is built with a focus on clean architecture, typed data, and a minimal UI.
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- Search books by title, author or keyword via Google Books API
+- View individual book details (cover, synopsis, page count, ISBN, rating)
+- URL-based navigation with React Router
+- Responsive layout with Tailwind CSS
+- Typed API responses with custom adapter pattern
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Planned (Phase 2)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- [ ] Authentication (login/signup)
+- [ ] Personal bookshelf (reading, read, want to read)
+- [ ] Save and manage your reading list
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| React 19 | UI framework |
+| TypeScript | Type safety |
+| Tailwind CSS 4 | Styling |
+| Vite | Build tool |
+| React Router DOM | Client-side routing |
+| Google Books API | Book data source |
+| Lucide React | Icons |
+
+## Project Structure
+
+```
+src/
+  components/     # Reusable UI components (SearchBar, ...)
+  pages/          # Route pages (Home, BookDetails)
+  services/       # API integration (googleBooks.ts)
+  types/          # TypeScript interfaces (Book, GoogleBooksResponse)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Getting Started
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Prerequisites
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- Node.js 18+
+- A [Google Books API key](https://developers.google.com/books/docs/v1/using#APIKey)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/euvitor/okbo.git
+cd okbo
+
+# Install dependencies
+npm install
+
+# Create your .env file
+echo "VITE_GOOGLE_BOOKS_API_KEY=your_api_key_here" > .env
+
+# Start the dev server
+npm run dev
 ```
+
+## License
+
+MIT — see [LICENSE](./LICENSE) for details.
+
+---
+
+Made by [euvitor](https://github.com/euvitor)
