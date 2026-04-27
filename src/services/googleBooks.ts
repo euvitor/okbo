@@ -1,5 +1,6 @@
 import type { Book } from "../types/book";
 import type { GoogleBooksResponse, GoogleBooksVolume } from "../types/googleBooks";
+import type { OrderBy, SearchFilters } from "../types/search";
 
 export function adaptGoogleBook(item: GoogleBooksVolume): Book {
     const volumeInfo = item.volumeInfo;
@@ -22,7 +23,15 @@ export function adaptGoogleBook(item: GoogleBooksVolume): Book {
     }
 }
 
-export async function searchBooks(query: string): Promise<Book[]> {
+function buildQuery(query: string, field: SearchFilters["field"]): string {
+    if (field === "title") return `intitle:${query}`
+    if (field === "author") return `inauthor:${query}`
+    if (field === "isbn") return `isbn:${query}`
+    if (field === "subject") return `subject:${query}`
+    return query // field === "all"
+}
+
+export async function searchBooks(query: string, filters: SearchFilters, orderBy?: OrderBy): Promise<Book[]> {
     const apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY
 
     if (!apiKey || typeof apiKey !== 'string') {
@@ -30,8 +39,11 @@ export async function searchBooks(query: string): Promise<Book[]> {
     }
 
     const params = new URLSearchParams({
-        q: query,
-        key: apiKey
+        q: buildQuery(query, filters.field),
+        key: apiKey,
+        printType: filters.printType ?? 'books',
+        orderBy: orderBy ?? 'relevance',
+        ...(filters.lang ? { lang: filters.lang } : {}),
     })
 
     const response = await fetch(`https://www.googleapis.com/books/v1/volumes?${params.toString()}`)
