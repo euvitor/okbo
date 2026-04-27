@@ -2,6 +2,7 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { Home } from './pages/Home'
 import { BookDetails } from './pages/BookDetails'
+import { SearchResults } from './pages/SearchResults'
 
 function App() {
   return (
@@ -13,6 +14,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/book/:id" element={<BookDetails />} />
+            <Route path="/search" element={<SearchResults />} />
+            
             {/* Rota de fallback para 404 */}
             <Route path="*" element={
               <div className="p-8 text-center">
