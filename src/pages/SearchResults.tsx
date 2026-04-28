@@ -39,10 +39,6 @@ export function SearchResults() {
         fetchBooks()
     }, [query, orderBy, field, lang, printType])
 
-    useEffect(() => {
-        console.log(books)
-    }, [books])
-
     if (loading) return <div>Carregando...</div>
     if (!query) return <div>Pesquisa vazia</div>
     if (error) return <div>Erro: {error}</div>
