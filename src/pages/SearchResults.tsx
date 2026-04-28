@@ -3,6 +3,8 @@ import { useSearchParams } from "react-router-dom"
 import type { Book } from "../types/book"
 import { searchBooks } from "../services/googleBooks"
 import type { OrderBy, PrintType, SearchField, SearchFilters } from "../types/search"
+import { BookCard } from "../components/BookCard"
+import { SearchBar } from "../components/SearchBar"
 
 export function SearchResults() {
     const [params, setParams] = useSearchParams()
@@ -13,6 +15,7 @@ export function SearchResults() {
     const printType = params.get('printType') as PrintType ?? undefined
     const filters: SearchFilters = { field, lang, printType }
     const [books, setBooks] = useState<Book[]>([])
+    const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -45,6 +48,15 @@ export function SearchResults() {
     if (books.length === 0) return <div>Nenhum livro encontrado</div>
     return (
         <>
+        <SearchBar variant="compact" />
+            <div>
+                <button onClick={() => setViewMode('grid')}>Grid</button>
+                <button onClick={() => setViewMode('list')}>List</button>
+            </div>
+
+            <div className={viewMode === 'grid' ? 'grid grid-cols-3 gap-4' : 'flex flex-col gap-2'}>
+                {books.map(book => <BookCard key={book.id} book={book} viewMode={viewMode} />)}
+            </div>
         </>
     )
 }
