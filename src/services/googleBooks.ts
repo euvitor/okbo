@@ -12,6 +12,7 @@ export function adaptGoogleBook(item: GoogleBooksVolume): Book {
     return {
         id: item.id,
         title: volumeInfo?.title ?? 'Título desconhecido',
+        subtitle: volumeInfo?.subtitle ?? null,
         authors: volumeInfo?.authors ?? [],
         description: volumeInfo?.description ?? null,
         coverUrl: volumeInfo?.imageLinks?.thumbnail ?? null,
@@ -53,4 +54,19 @@ export async function searchBooks(query: string, filters: SearchFilters, orderBy
     const data: GoogleBooksResponse = await response.json()
 
     return (data.items ?? []).map(adaptGoogleBook)
+}
+
+export async function getBookById(id: string): Promise<Book> {
+    const apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY
+    if (!apiKey || typeof apiKey !== 'string') {
+        throw new Error('Defina VITE_GOOGLE_BOOKS_API_KEY no .env')
+    }
+
+    const response = await fetch(`https://www.googleapis.com/books/v1/volumes/${id}?key=${apiKey}`)
+
+    if (!response.ok) throw new Error("Erro ao buscar livro")
+
+    const data: GoogleBooksVolume = await response.json()
+
+    return adaptGoogleBook(data)
 }

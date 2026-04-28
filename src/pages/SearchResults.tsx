@@ -7,7 +7,7 @@ import { BookCard } from "../components/BookCard"
 import { SearchBar } from "../components/SearchBar"
 
 export function SearchResults() {
-    const [params, setParams] = useSearchParams()
+    const [params, _setParams] = useSearchParams()
     const query = params.get('query') ?? ''
     const orderBy = params.get('orderBy') as OrderBy ?? 'relevance'
     const field = params.get('field') as SearchField ?? 'all'
