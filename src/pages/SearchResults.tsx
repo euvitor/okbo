@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import type { Book } from "../types/book"
 import { searchBooks } from "../services/googleBooks"
-import type { OrderBy, PrintType, SearchField, SearchFilters } from "../types/search"
+import type { OrderBy, SearchField, SearchFilters } from "../types/search"
 import { BookCard } from "../components/BookCard"
 import { SearchBar } from "../components/SearchBar"
 
@@ -12,8 +12,7 @@ export function SearchResults() {
     const orderBy = params.get('orderBy') as OrderBy ?? 'relevance'
     const field = params.get('field') as SearchField ?? 'all'
     const lang = params.get('lang') as SearchFilters["lang"] ?? undefined
-    const printType = params.get('printType') as PrintType ?? undefined
-    const filters: SearchFilters = { field, lang, printType }
+    const filters: SearchFilters = { field, lang }
     const [books, setBooks] = useState<Book[]>([])
     const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid')
     const [loading, setLoading] = useState(false)
@@ -40,7 +39,7 @@ export function SearchResults() {
     }
     useEffect(() => {
         fetchBooks()
-    }, [query, orderBy, field, lang, printType])
+    }, [query, orderBy, field, lang])
 
     if (loading) return <div>Carregando...</div>
     if (!query) return <div>Pesquisa vazia</div>

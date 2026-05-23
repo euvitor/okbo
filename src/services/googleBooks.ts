@@ -24,12 +24,15 @@ export function adaptGoogleBook(item: GoogleBooksVolume): Book {
     }
 }
 
-function buildQuery(query: string, field: SearchFilters["field"]): string {
+function buildQuery(query: string, field: SearchFilters["field"],genre?: string): string {
+    let q = query
+
     if (field === "title") return `intitle:${query}`
     if (field === "author") return `inauthor:${query}`
     if (field === "isbn") return `isbn:${query}`
-    if (field === "subject") return `subject:${query}`
-    return query // field === "all"
+
+    if (genre) q += `+subject:${genre}`
+    return q // field === "all"
 }
 
 export async function searchBooks(query: string, filters: SearchFilters, orderBy?: OrderBy): Promise<Book[]> {
@@ -40,9 +43,8 @@ export async function searchBooks(query: string, filters: SearchFilters, orderBy
     }
 
     const params = new URLSearchParams({
-        q: buildQuery(query, filters.field),
+        q: buildQuery(query, filters.field, filters.genre),
         key: apiKey,
-        printType: filters.printType ?? 'books',
         orderBy: orderBy ?? 'relevance',
         ...(filters.lang ? { lang: filters.lang } : {}),
     })

@@ -1,79 +1,87 @@
 # okbo.
-
 > bookfinder + bookshelf — find books, save your reads.
 
-![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=black) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat&logo=tailwindcss&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat&logo=vite&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?style=flat&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=flat&logo=vite&logoColor=white)
 
-## About
-
+## 📖 About
 **okbo** is a web app for searching and discovering books using the Google Books API. The goal is to evolve into a personal bookshelf — where you can track what you've read, are reading, or want to read.
 
-The project is built with a focus on clean architecture, typed data, and a minimal UI.
+Built as a fullstack portfolio project, with a focus on clean architecture, typed data contracts, and a thoughtful UI.
 
-## Features
-
-- Search books by title, author or keyword via Google Books API
+## ✨ Features
+- Search books by title, author, ISBN or subject via Google Books API
+- Filter by language and print type
 - View individual book details (cover, synopsis, page count, ISBN, rating)
-- URL-based navigation with React Router
+- URL-based navigation — searches are shareable links
+- Typed API responses with a custom adapter pattern
 - Responsive layout with Tailwind CSS
-- Typed API responses with custom adapter pattern
 
-## Planned (Phase 2)
+## 🚧 Planned (Phase 2)
+- [ ] Authentication with Supabase Auth (login/signup)
+- [ ] Personal bookshelf with reading status (reading, read, want to read)
+- [ ] Save, edit and review books
+- [ ] Protected routes for shelf access
 
-- [ ] Authentication (login/signup)
-- [ ] Personal bookshelf (reading, read, want to read)
-- [ ] Save and manage your reading list
-
-## Tech Stack
-
+## 🛠️ Tech Stack
 | Technology | Purpose |
 |---|---|
 | React 19 | UI framework |
-| TypeScript | Type safety |
+| TypeScript 6 | Type safety |
 | Tailwind CSS 4 | Styling |
-| Vite | Build tool |
-| React Router DOM | Client-side routing |
+| Vite 8 | Build tool |
+| React Router DOM 7 | Client-side routing |
 | Google Books API | Book data source |
 | Lucide React | Icons |
+| Supabase *(planned)* | Auth + database (Phase 2) |
 
-## Project Structure
-
+## 📁 Project Structure
+```text
+src/ 
+  components/ # Reusable UI components (SearchBar, BookCard, ...) 
+  pages/      # Route pages (Home, SearchResults, BookDetails) 
+  services/   # API integration + adapter (googleBooks.ts) 
+  types/      # TypeScript interfaces (Book, GoogleBooksResponse, SearchFilters) 
+  utils/      # Generic helpers
 ```
-src/
-  components/     # Reusable UI components (SearchBar, ...)
-  pages/          # Route pages (Home, BookDetails)
-  services/       # API integration (googleBooks.ts)
-  types/          # TypeScript interfaces (Book, GoogleBooksResponse)
+
+## 🏗️ Architecture
+Data flows from Google Books API through a typed adapter before reaching any component:
+
+```text
+User input → SearchBar → /search?q=... 
+                              ↓ 
+                        SearchResults 
+                              ↓ 
+                     googleBooks service 
+                              ↓ 
+                      adaptGoogleBook() → Book 
+                                            ↓ 
+                                         BookCard 
+                                            ↓ 
+                                       /book/:id → BookDetails
 ```
 
-## Getting Started
+`Book` is the internal contract — components never consume raw API types directly.
 
-### Prerequisites
+## 🚀 Getting Started
 
+### 📋 Prerequisites
 - Node.js 18+
 - A [Google Books API key](https://developers.google.com/books/docs/v1/using#APIKey)
 
-### Installation
-
+### ⚙️ Installation
 ```bash
-# Clone the repository
-git clone https://github.com/euvitor/okbo.git
+git clone [https://github.com/euvitor/okbo.git](https://github.com/euvitor/okbo.git)
 cd okbo
-
-# Install dependencies
 npm install
-
-# Create your .env file
 echo "VITE_GOOGLE_BOOKS_API_KEY=your_api_key_here" > .env
-
-# Start the dev server
 npm run dev
 ```
 
-## License
+## 📄 License
+MIT — see LICENSE for details.
 
-MIT — see [LICENSE](./LICENSE) for details.
-
----
-
-Made by [euvitor](https://github.com/euvitor)
+Made by euvitor
