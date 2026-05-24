@@ -8,16 +8,13 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ variant }: SearchBarProps) {
-    const isHero = variant === 'hero'
-    const [query, setQuery] = useState<string>('')
-    const [filters, setFilters] = useState<SearchFilters>({ field: 'all' })
-    const navigate = useNavigate()
     const FIELD_OPTIONS = [
         { value: 'all', label: 'All' },
         { value: 'title', label: 'Title' },
         { value: 'author', label: 'Author' },
         { value: 'isbn', label: 'ISBN' },
     ] as const
+
     const GENRE_OPTIONS = [
         { value: 'fiction', label: 'Fiction' },
         { value: 'non-fiction', label: 'Non-fiction' },
@@ -26,6 +23,15 @@ export function SearchBar({ variant }: SearchBarProps) {
         { value: 'science-fiction', label: 'Science Fiction' },
         { value: 'fantasy', label: 'Fantasy' },
     ] as const
+
+    const isHero = variant === 'hero'
+
+    const [query, setQuery] = useState<string>('')
+    const [filters, setFilters] = useState<SearchFilters>({ field: 'all' })
+    const [isFiltersOpen, setIsFiltersOpen] = useState<boolean>(false)
+
+    const navigate = useNavigate()
+
     const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         const params = new URLSearchParams()
@@ -38,55 +44,71 @@ export function SearchBar({ variant }: SearchBarProps) {
 
     return (
         <form onSubmit={submitHandler}
-            className={`${isHero ? 'flex flex-col items-center justify-center' : 'flex flex-row items-center justify-center'} w-2/5 gap-1`}
+            className={`w-2/5 ${isHero ? 'relative' : ''} gap-1`}
         >
-            <div className="glass flex flex-row gap-2 py-1 px-1 rounded-xl w-full">
-                <button type="button"><SlidersHorizontalIcon className="size-8 hover:bg-violet-500/10 text-slate-500 hover:text-violet-500 p-2 rounded-lg transition-all" /></button>
+            <div className="glass flex flex-row w-full gap-2 px-1 py-1 rounded-xl">
+                <button type="button">
+                    <SlidersHorizontalIcon
+                        onClick={() => setIsFiltersOpen(prev => !prev)}
+                        className={`size-8 p-2 text-slate-500 rounded-lg transition-all hover:bg-violet-500/10 hover:text-violet-500 ${isFiltersOpen ? 'bg-violet-500/10 text-violet-500' : ''}`}
+                    />
+                </button>
                 <input
-                    type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search for a book"
-                    className="border-none outline-none w-full" />
-                <button type="submit"><SearchIcon className="size-8 hover:bg-violet-500/10 text-slate-500 hover:text-violet-500 p-2 rounded-lg transition-all" /></button>
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search for a book"
+                    className="w-full border-none outline-none"
+                />
+                <button type="submit">
+                    <SearchIcon className="size-8 p-2 text-slate-500 rounded-lg transition-all hover:bg-violet-500/10 hover:text-violet-500" />
+                </button>
             </div>
-            <div className="glass flex flex-col gap-2 py-1 px-1 rounded-xl w-full">
-                <div className="flex flex-row gap-2">
-                    {FIELD_OPTIONS.map(option => (
-                        <button
-                            key={option.value}
-                            type="button"
-                            onClick={() => setFilters({ ...filters, field: option.value })}
-                            className={filters.field === option.value
-                                ? 'bg-violet-500 text-white rounded-lg px-3 py-1 text-sm w-full shadow-md'
-                                : 'text-slate-500 rounded-lg px-3 py-1 text-sm hover:bg-violet-500/10 w-full'
-                            }
-                        >{option.label}</button>
-                    ))}
-                </div>
-                <div className="flex flex-row gap-2">
-                    <div className="glass flex flex-row items-center gap-1 rounded-xl px-3 py-2 w-full">
-                        <select
-                            value={filters.lang ?? ''}
-                            onChange={(e) => setFilters({ ...filters, lang: e.target.value === '' ? undefined : e.target.value as 'pt' | 'en' })}
-                            className="bg-transparent text-sm text-slate-600 outline-none cursor-pointer appearance-none w-full">
-                            <option value="">Languages</option>
-                            <option value="pt">Português</option>
-                            <option value="en">English</option>
-                        </select>
-                        <ChevronDownIcon className="w-4 h-4 text-slate-400" />
+
+            {isFiltersOpen && (
+                <div className="glass absolute top-full left-0 mt-1 flex flex-col w-full gap-2 px-1 py-1 rounded-xl z-10">
+                    <div className="flex flex-row gap-2">
+                        {FIELD_OPTIONS.map(option => (
+                            <button
+                                key={option.value}
+                                type="button"
+                                onClick={() => setFilters({ ...filters, field: option.value })}
+                                className={filters.field === option.value
+                                    ? 'w-full px-3 py-1 text-sm text-white bg-violet-500 rounded-lg shadow-md'
+                                    : 'w-full px-3 py-1 text-sm text-slate-500 rounded-lg hover:bg-violet-500/10'
+                                }
+                            >
+                                {option.label}
+                            </button>
+                        ))}
                     </div>
-                    <div className="glass flex flex-row items-center gap-1 rounded-xl px-3 py-2 w-full">
-                        <select
-                            value={filters.genre ?? ''}
-                            onChange={(e) => setFilters({ ...filters, genre: e.target.value === '' ? undefined : e.target.value })}
-                            className="bg-transparent text-sm text-slate-600 outline-none cursor-pointer appearance-none w-full">
-                            <option value="">Genres</option>
-                            {GENRE_OPTIONS.map(option => (
-                                <option value={option.value}>{option.label}</option>
-                            ))}
-                        </select>
-                        <ChevronDownIcon className="w-4 h-4 text-slate-400" />
+                    <div className="flex flex-row gap-2">
+                        <div className="glass flex flex-row items-center w-full gap-1 px-3 py-2 rounded-xl">
+                            <select
+                                value={filters.lang ?? ''}
+                                onChange={(e) => setFilters({ ...filters, lang: e.target.value === '' ? undefined : e.target.value as 'pt' | 'en' })}
+                                className="w-full appearance-none text-sm text-slate-600 bg-transparent outline-none cursor-pointer">
+                                <option value="">Languages</option>
+                                <option value="pt">Português</option>
+                                <option value="en">English</option>
+                            </select>
+                            <ChevronDownIcon className="w-4 h-4 text-slate-400" />
+                        </div>
+                        <div className="glass flex flex-row items-center w-full gap-1 px-3 py-2 rounded-xl">
+                            <select
+                                value={filters.genre ?? ''}
+                                onChange={(e) => setFilters({ ...filters, genre: e.target.value === '' ? undefined : e.target.value })}
+                                className="w-full appearance-none text-sm text-slate-600 bg-transparent outline-none cursor-pointer">
+                                <option value="">Genres</option>
+                                {GENRE_OPTIONS.map(option => (
+                                    <option value={option.value}>{option.label}</option>
+                                ))}
+                            </select>
+                            <ChevronDownIcon className="w-4 h-4 text-slate-400" />
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
         </form>
     )
 }
