@@ -2,9 +2,43 @@ import { useState } from "react"
 import type { SearchFilters } from "../types/search"
 import { useNavigate } from "react-router-dom"
 import { ChevronDownIcon, SearchIcon, SlidersHorizontalIcon } from "lucide-react"
+import * as Select from '@radix-ui/react-select'
 
 interface SearchBarProps {
     variant?: 'hero' | 'compact'
+}
+
+function FilterSelect({ value, onValueChange, placeholder, options }: {
+    value: string
+    onValueChange: (val: string) => void
+    placeholder: string
+    options: { value: string, label: string }[]
+}) {
+    return (
+        <Select.Root value={value} onValueChange={onValueChange}>
+            <Select.Trigger className="glass flex flex-row items-center w-full gap-1 px-3 py-2 rounded-xl text-sm text-slate-600 outline-none cursor-pointer">
+                <Select.Value placeholder={placeholder} />
+                <Select.Icon>
+                    <ChevronDownIcon className="w-4 h-4 text-slate-400" />
+                </Select.Icon>
+            </Select.Trigger>
+            <Select.Portal>
+                <Select.Content className="glass rounded-xl overflow-hidden z-50">
+                    <Select.Viewport className="p-1">
+                        {options.map(opt => (
+                            <Select.Item
+                                key={opt.value}
+                                value={opt.value}
+                                className="px-3 py-1.5 text-sm text-slate-600 rounded-lg cursor-pointer outline-none hover:bg-violet-500/10 data-[state=checked]:text-violet-500"
+                            >
+                                <Select.ItemText>{opt.label}</Select.ItemText>
+                            </Select.Item>
+                        ))}
+                    </Select.Viewport>
+                </Select.Content>
+            </Select.Portal>
+        </Select.Root>
+    )
 }
 
 export function SearchBar({ variant }: SearchBarProps) {
@@ -83,29 +117,18 @@ export function SearchBar({ variant }: SearchBarProps) {
                         ))}
                     </div>
                     <div className="flex flex-row gap-2">
-                        <div className="glass flex flex-row items-center w-full gap-1 px-3 py-2 rounded-xl">
-                            <select
-                                value={filters.lang ?? ''}
-                                onChange={(e) => setFilters({ ...filters, lang: e.target.value === '' ? undefined : e.target.value as 'pt' | 'en' })}
-                                className="w-full appearance-none text-sm text-slate-600 bg-transparent outline-none cursor-pointer">
-                                <option value="">Languages</option>
-                                <option value="pt">Português</option>
-                                <option value="en">English</option>
-                            </select>
-                            <ChevronDownIcon className="w-4 h-4 text-slate-400" />
-                        </div>
-                        <div className="glass flex flex-row items-center w-full gap-1 px-3 py-2 rounded-xl">
-                            <select
-                                value={filters.genre ?? ''}
-                                onChange={(e) => setFilters({ ...filters, genre: e.target.value === '' ? undefined : e.target.value })}
-                                className="w-full appearance-none text-sm text-slate-600 bg-transparent outline-none cursor-pointer">
-                                <option value="">Genres</option>
-                                {GENRE_OPTIONS.map(option => (
-                                    <option value={option.value}>{option.label}</option>
-                                ))}
-                            </select>
-                            <ChevronDownIcon className="w-4 h-4 text-slate-400" />
-                        </div>
+                        <FilterSelect
+                            value={filters.lang ?? ''}
+                            onValueChange={(val) => setFilters({ ...filters, lang: val === '' ? undefined : val as 'pt' | 'en' })}
+                            placeholder="Languages"
+                            options={[{ value: 'pt', label: 'Português' }, { value: 'en', label: 'English' }]}
+                        />
+                        <FilterSelect
+                            value={filters.genre ?? ''}
+                            onValueChange={(val) => setFilters({ ...filters, genre: val === '' ? undefined : val })}
+                            placeholder="Genres"
+                            options={[...GENRE_OPTIONS]}
+                        />
                     </div>
                 </div>
             )}
