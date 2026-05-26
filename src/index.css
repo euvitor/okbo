@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
 
 @font-face {
     font-family: 'Erode';
@@ -7,7 +8,8 @@
     font-style: normal;
     font-display: swap;
 }
-@font-face{
+
+@font-face {
     font-family: 'Erode';
     src: url('/fonts/Erode-VariableItalic.woff2') format('woff2');
     font-weight: 300 700;
@@ -29,9 +31,15 @@
 }
 
 @utility glass {
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border: 1px solid rgba(255, 255, 255, 0.45);
     box-shadow: 0 8px 32px rgba(99, 102, 241, 0.10);
+
+    @variant dark {
+        background: rgba(15, 15, 15, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.08);
+    }
 }

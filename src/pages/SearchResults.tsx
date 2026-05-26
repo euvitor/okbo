@@ -4,7 +4,6 @@ import type { Book } from "../types/book"
 import { searchBooks } from "../services/googleBooks"
 import type { OrderBy, SearchField, SearchFilters } from "../types/search"
 import { BookCard } from "../components/BookCard"
-import { SearchBar } from "../components/SearchBar"
 
 export function SearchResults() {
     const [params, _setParams] = useSearchParams()
@@ -47,7 +46,6 @@ export function SearchResults() {
     if (books.length === 0) return <div>Nenhum livro encontrado</div>
     return (
         <>
-        <SearchBar variant="compact" />
             <div>
                 <button onClick={() => setViewMode('grid')}>Grid</button>
                 <button onClick={() => setViewMode('list')}>List</button>
