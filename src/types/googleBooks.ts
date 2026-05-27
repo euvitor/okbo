@@ -16,6 +16,7 @@ export interface GoogleBooksVolume {
             identifier: string;
         }[];
         averageRating?: number;
+        ratingsCount?: number;
         categories?: string[];
     };
 }

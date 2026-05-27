@@ -10,30 +10,31 @@ export function Header() {
     const isHome = location.pathname === '/'
 
     return (
-        <header className="fixed top-0 inset-x-0 z-50 h-16 flex items-center gap-4 px-6
-            bg-linear-to-b from-neutral-50/90 to-neutral-50/30
-            dark:from-neutral-950/90 dark:to-neutral-950/30
-            backdrop-blur-md border-b border-white/30 dark:border-white/5">
+        <header className="fixed top-0 inset-x-0 z-50 h-30
+                        bg-gradient-to-b from-neutral-50/90 via-neutral-50/60 to-transparent
+                        dark:from-neutral-950/90 dark:via-neutral-950/60 dark:to-transparent
+                        backdrop-blur-md header-fade">
+            <div className="max-w-[1200px] w-full h-full px-6 py-6 flex gap-10">
+                {!isHome && (
+                    <Link to="/" className="mt-1.5 font-display text-xl font-bold shrink-0">
+                        okbo<span className="text-violet-500">.</span>
+                    </Link>
+                )}
 
-            {!isHome && (
-                <Link to="/" className="font-display text-xl font-bold shrink-0">
-                    okbo<span className="text-violet-500">.</span>
-                </Link>
-            )}
+                {isSearch && (
+                    <div className="max-w-[500px] mx-auto flex-1 flex justify-center">
+                        <SearchBar variant="compact" />
+                    </div>
+                )}
 
-            {isSearch && (
-                <div className="flex-1 flex justify-center">
-                    <SearchBar variant="compact" />
-                </div>
-            )}
-
-            <button
-                onClick={toggleTheme}
-                aria-label="Toggle theme"
-                className="size-8 p-1.5 rounded-lg text-slate-500 dark:text-slate-400 transition-all hover:bg-violet-500/10 hover:text-violet-500 ml-auto shrink-0"
-            >
-                {theme === "dark" ? <SunIcon /> : <MoonIcon />}
-            </button>
+                <button
+                    onClick={toggleTheme}
+                    aria-label="Toggle theme"
+                    className="size-8 p-1.5 rounded-full text-slate-500 dark:text-slate-400 transition-all hover:bg-violet-500/10 hover:text-violet-500 ml-auto shrink-0"
+                >
+                    {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+                </button>
+            </div>
         </header>
     )
 }

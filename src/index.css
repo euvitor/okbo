@@ -35,11 +35,16 @@
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border: 1px solid rgba(255, 255, 255, 0.45);
-    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.10);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 12px 48px rgba(99, 102, 241, 0.18);
 
     @variant dark {
         background: rgba(15, 15, 15, 0.45);
         border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.08);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 48px rgba(99, 102, 241, 0.14);
     }
+}
+
+@utility header-fade {
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
 }

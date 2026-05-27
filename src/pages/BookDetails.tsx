@@ -36,7 +36,7 @@ export function BookDetails() {
 
     return (
         <div className="max-w-3xl mx-auto p-4">
-            <Link to="/" className="text-blue-600 hover:underline mb-4 inline-block">
+            <Link to="/search" className="text-blue-600 hover:underline mb-4 inline-block">
                 &larr; Voltar para busca
             </Link>
             <div className="flex flex-col gap-2">

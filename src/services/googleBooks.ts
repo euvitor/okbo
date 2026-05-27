@@ -20,7 +20,8 @@ export function adaptGoogleBook(item: GoogleBooksVolume): Book {
         publishedDate: volumeInfo?.publishedDate ?? null,
         isbn,
         categories: volumeInfo?.categories ?? [],
-        averageRating: volumeInfo?.averageRating ?? null
+        averageRating: volumeInfo?.averageRating ?? null,
+        ratingsCount: volumeInfo?.ratingsCount ?? undefined,
     }
 }
 

@@ -10,4 +10,5 @@ export interface Book {
     isbn: string | null;
     categories: string[];
     averageRating: number | null;
+    ratingsCount?: number;
 }
