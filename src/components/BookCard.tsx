@@ -1,35 +1,27 @@
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import type { Book } from "../types/book"
+import { StarRating } from "./StarRating"
 interface BookProps {
     book: Book
     viewMode: 'list' | 'grid'
 }
-function StarRating({ rating, count }: { rating: number | null; count?: number }) {
-    if (!rating) return null
-    return (
-        <div className="flex items-center gap-1">
-            {[1, 2, 3, 4, 5].map(i => (
-                <span key={i} className={`text-xs ${i <= Math.round(rating) ? 'text-amber-400' : 'text-neutral-300 dark:text-neutral-600'}`}>★</span>
-            ))}
-            {count && <span className="text-xs text-neutral-400 dark:text-neutral-500">({count})</span>}
-        </div>
-    )
-}
+
 function CoverFallback({ title }: { title: string }) {
     return (
-        <div className="w-full h-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center rounded-2xl">
+        <div className="w-full h-full bg-linear-to-br from-violet-500 to-indigo-600 flex items-center justify-center rounded-2xl">
             <span className="text-white text-3xl font-bold">{title[0]?.toUpperCase()}</span>
         </div>
     )
 }
 export function BookCard({ book, viewMode }: BookProps) {
     const navigate = useNavigate()
-    const handleClick = () => navigate(`/book/${book.id}`, { state: { book } })
+    const location = useLocation()
+    const handleClick = () => navigate(`/book/${book.id}`, { state: { book, backUrl: location.pathname + location.search } })
     const year = book.publishedDate?.slice(0, 4)
     if (viewMode === 'grid') {
         return (
             <div onClick={handleClick} className="cursor-pointer group flex flex-col gap-2 transition-transform hover:scale-[1.02]">
-                <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-md group-hover:shadow-xl transition-shadow">
+                <div className="aspect-2/3 rounded-2xl overflow-hidden shadow-md group-hover:shadow-xl transition-shadow">
                     {book.coverUrl
                         ? <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" />
                         : <CoverFallback title={book.title} />

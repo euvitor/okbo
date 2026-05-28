@@ -6,22 +6,22 @@ import { SearchBar } from "./SearchBar";
 export function Header() {
     const { theme, toggleTheme } = useThemeContext()
     const location = useLocation()
-    const isSearch = location.pathname === '/search'
     const isHome = location.pathname === '/'
+    const showSearch = !isHome
 
     return (
         <header className="fixed top-0 inset-x-0 z-50 h-30
-                        bg-gradient-to-b from-neutral-50/90 via-neutral-50/60 to-transparent
+                        bg-linear-to-b from-neutral-50/90 via-neutral-50/60 to-transparent
                         dark:from-neutral-950/90 dark:via-neutral-950/60 dark:to-transparent
                         backdrop-blur-md header-fade">
-            <div className="max-w-[1200px] w-full h-full px-6 py-6 flex gap-10">
+            <div className="max-w-[1200px] mx-auto w-full h-full px-6 py-6 flex justify-between">
                 {!isHome && (
-                    <Link to="/" className="mt-1.5 font-display text-xl font-bold shrink-0">
+                    <Link to="/" className="mt-1.5 font-display text-3xl font-bold mr-auto shrink-0">
                         okbo<span className="text-violet-500">.</span>
                     </Link>
                 )}
 
-                {isSearch && (
+                {showSearch && (
                     <div className="max-w-[500px] mx-auto flex-1 flex justify-center">
                         <SearchBar variant="compact" />
                     </div>

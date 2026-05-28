@@ -103,7 +103,7 @@ export function SearchBar({ variant }: SearchBarProps) {
     return (
         <form
             onSubmit={submitHandler}
-            className={`relative gap-1 ${isHero ? 'w-3/5' : 'w-full'}`}
+            className={`relative gap-1 ${isHero ? 'w-full max-w-[540px]' : 'w-full'}`}
         >
             <div className="glass flex flex-row w-full gap-2 px-1 py-1 rounded-full">
                 <button type="button">
