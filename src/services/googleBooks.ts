@@ -2,6 +2,20 @@ import type { Book } from "../types/book";
 import type { GoogleBooksResponse, GoogleBooksVolume } from "../types/googleBooks";
 import type { OrderBy, SearchFilters } from "../types/search";
 
+function buildCoverUrl(imageLinks?: GoogleBooksVolume['volumeInfo']['imageLinks']): string | null {
+    if (!imageLinks) return null
+    const raw =
+        imageLinks.extraLarge ??
+        imageLinks.large ??
+        imageLinks.medium ??
+        imageLinks.small ??
+        imageLinks.thumbnail ??
+        imageLinks.smallThumbnail ??
+        null
+    if (!raw) return null
+    return raw.replace(/^http:\/\//, 'https://')
+}
+
 export function adaptGoogleBook(item: GoogleBooksVolume): Book {
     const volumeInfo = item.volumeInfo;
 
@@ -15,7 +29,7 @@ export function adaptGoogleBook(item: GoogleBooksVolume): Book {
         subtitle: volumeInfo?.subtitle ?? null,
         authors: volumeInfo?.authors ?? [],
         description: volumeInfo?.description ?? null,
-        coverUrl: volumeInfo?.imageLinks?.thumbnail ?? null,
+        coverUrl: buildCoverUrl(volumeInfo?.imageLinks),
         pageCount: volumeInfo?.pageCount ?? null,
         publishedDate: volumeInfo?.publishedDate ?? null,
         isbn,
@@ -36,7 +50,13 @@ function buildQuery(query: string, field: SearchFilters["field"],genre?: string)
     return q // field === "all"
 }
 
-export async function searchBooks(query: string, filters: SearchFilters, orderBy?: OrderBy): Promise<Book[]> {
+export async function searchBooks(
+    query: string,
+    filters: SearchFilters,
+    orderBy?: OrderBy,
+    startIndex = 0,
+    maxResults = 20
+): Promise<{ books: Book[]; totalItems: number }> {
     const apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY
 
     if (!apiKey || typeof apiKey !== 'string') {
@@ -47,6 +67,8 @@ export async function searchBooks(query: string, filters: SearchFilters, orderBy
         q: buildQuery(query, filters.field, filters.genre),
         key: apiKey,
         orderBy: orderBy ?? 'relevance',
+        startIndex: String(startIndex),
+        maxResults: String(maxResults),
         ...(filters.lang ? { lang: filters.lang } : {}),
     })
 
@@ -56,7 +78,10 @@ export async function searchBooks(query: string, filters: SearchFilters, orderBy
 
     const data: GoogleBooksResponse = await response.json()
 
-    return (data.items ?? []).map(adaptGoogleBook)
+    return {
+        books: (data.items ?? []).map(adaptGoogleBook),
+        totalItems: data.totalItems ?? 0,
+    }
 }
 
 export async function getBookById(id: string): Promise<Book> {

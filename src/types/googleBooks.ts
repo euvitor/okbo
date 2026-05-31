@@ -10,6 +10,10 @@ export interface GoogleBooksVolume {
         imageLinks?: {
             smallThumbnail?: string;
             thumbnail?: string;
+            small?: string;
+            medium?: string;
+            large?: string;
+            extraLarge?: string;
         };
         industryIdentifiers?: {
             type: string;
@@ -24,4 +28,5 @@ export interface GoogleBooksVolume {
 
 export interface GoogleBooksResponse {
     items?: GoogleBooksVolume[];
+    totalItems?: number;
 }

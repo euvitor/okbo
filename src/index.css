@@ -45,6 +45,48 @@
 }
 
 @utility header-fade {
-    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    position: relative;
+    background: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: linear-gradient(
+            to bottom,
+            oklch(97.1% 0.003 264.54 / 90%) 0%,
+            oklch(97.1% 0.003 264.54 / 60%) 60%,
+            transparent 100%
+        );
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    }
+
+    @variant dark {
+        &::before {
+            background: linear-gradient(
+                to bottom,
+                oklch(14.5% 0.003 264.54 / 90%) 0%,
+                oklch(14.5% 0.003 264.54 / 60%) 60%,
+                transparent 100%
+            );
+        }
+    }
+}
+
+@utility app-bg {
+    background-color: oklch(97.1% 0.003 264.54); /* fallback = neutral-50 */
+    background-image: url('/images/light-bg.svg');
+    background-size: cover;
+    background-position: center top;
+    background-attachment: fixed;
+    @variant dark {
+        background-color: oklch(14.5% 0.003 264.54); /* fallback = neutral-950 */
+        background-image: url('/images/dark-bg.svg');
+    }
 }

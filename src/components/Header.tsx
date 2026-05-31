@@ -10,11 +10,8 @@ export function Header() {
     const showSearch = !isHome
 
     return (
-        <header className="fixed top-0 inset-x-0 z-50 h-30
-                        bg-linear-to-b from-neutral-50/90 via-neutral-50/60 to-transparent
-                        dark:from-neutral-950/90 dark:via-neutral-950/60 dark:to-transparent
-                        backdrop-blur-md header-fade">
-            <div className="max-w-[1200px] mx-auto w-full h-full px-6 py-6 flex justify-between">
+        <header className="fixed top-0 inset-x-0 z-50 h-30 header-fade">
+            <div className="max-w-[1200px] mx-auto w-full h-full px-6 py-6 flex justify-between items-start">
                 {!isHome && (
                     <Link to="/" className="mt-1.5 font-display text-3xl font-bold mr-auto shrink-0">
                         okbo<span className="text-violet-500">.</span>
@@ -30,7 +27,7 @@ export function Header() {
                 <button
                     onClick={toggleTheme}
                     aria-label="Toggle theme"
-                    className="size-8 p-1.5 rounded-full text-slate-500 dark:text-slate-400 transition-all hover:bg-violet-500/10 hover:text-violet-500 ml-auto shrink-0"
+                    className="size-8 p-1.5 rounded-full text-slate-500 dark:text-slate-400 transition-all hover:text-violet-500 ml-auto shrink-0"
                 >
                     {theme === "dark" ? <SunIcon /> : <MoonIcon />}
                 </button>

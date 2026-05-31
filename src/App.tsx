@@ -10,8 +10,8 @@ function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
-        <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-50 flex flex-col">
-          <div className='max-w-[1200px] mx-auto w-full px-6 flex flex-col flex-1 pt-32'>
+        <div className="min-h-screen app-bg text-neutral-900 dark:text-neutral-50 flex flex-col">
+          <div className='max-w-[1200px] mx-auto w-full px-3 flex flex-col flex-1 pt-32'>
             <Header />
             <main className="flex-1 flex flex-col">
               <Routes>
