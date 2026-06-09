@@ -1,43 +1,63 @@
 // src/App.tsx
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
-import { Home } from './pages/Home'
-import { BookDetails } from './pages/BookDetails'
-import { SearchResults } from './pages/SearchResults'
-import { ThemeProvider } from './context/ThemeContext'
-import { Header } from './components/Header'
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { Header } from "./components/Header";
+import { Home } from "./pages/Home";
+import { BookDetails } from "./pages/BookDetails";
+import { SearchResults } from "./pages/SearchResults";
+import { useAuth } from "./context/AuthContext";
+import { AuthModal } from "./components/AuthModal";
 
 function App() {
+  const { isAuthModalOpen } = useAuth();
+
   return (
-    <ThemeProvider>
-      <BrowserRouter>
-        <div className="min-h-screen app-bg text-neutral-900 dark:text-neutral-50 flex flex-col">
-          <div className='max-w-[1200px] mx-auto w-full px-3 flex flex-col flex-1 pt-32'>
-            <Header />
-            <main className="flex-1 flex flex-col">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/book/:id" element={<BookDetails />} />
-                <Route path="/search" element={<SearchResults />} />
-                {/* Rota de fallback para 404 */}
-                <Route path="*" element={
+    <BrowserRouter>
+      <div className="app-bg flex min-h-screen flex-col text-neutral-900 dark:text-neutral-50">
+        <div className="mx-auto flex w-full max-w-300 flex-1 flex-col px-3 pt-32">
+          <Header />
+          <main className="flex flex-1 flex-col">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/book/:id" element={<BookDetails />} />
+              <Route path="/search" element={<SearchResults />} />
+              {/* 404 Fallback Route  */}
+              <Route
+                path="*"
+                element={
                   <div className="p-8 text-center">
-                    <h2 className="text-2xl font-bold">Página não encontrada</h2>
-                    <Link to="/" className="text-violet-500 hover:underline mt-4 inline-block">Voltar ao início</Link>
+                    <h2 className="text-2xl font-bold">
+                      Página não encontrada
+                    </h2>
+                    <Link
+                      to="/"
+                      className="mt-4 inline-block text-violet-500 hover:underline"
+                    >
+                      Voltar ao início
+                    </Link>
                   </div>
-                } />
-              </Routes>
-            </main>
-            <footer className="py-4 text-center text-xs text-slate-400">
-              {'made with <📚💜/> by '}
-              <a href="https://github.com/euvitor" className="hover:text-violet-500 transition-colors">
-                euvitor
-              </a>
-            </footer>
-          </div>
+                }
+              />
+            </Routes>
+          </main>
+          <footer className="py-4 text-center text-xs text-slate-400">
+            {"made with <📚💜/> by "}
+            <a
+              href="https://github.com/euvitor"
+              className="transition-colors hover:text-violet-500"
+            >
+              euvitor
+            </a>
+          </footer>
+
+          {isAuthModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-slate-950/70 backdrop-blur-sm">
+              <AuthModal />
+            </div>
+          )}
         </div>
-      </BrowserRouter>
-    </ThemeProvider>
-  )
+      </div>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

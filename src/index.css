@@ -2,91 +2,92 @@
 @variant dark (&:where(.dark, .dark *));
 
 @font-face {
-    font-family: 'Erode';
-    src: url('/fonts/Erode-Variable.woff2') format('woff2');
-    font-weight: 300 700;
-    font-style: normal;
-    font-display: swap;
+  font-family: 'Erode';
+  src: url('/fonts/Erode-Variable.woff2') format('woff2');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-    font-family: 'Erode';
-    src: url('/fonts/Erode-VariableItalic.woff2') format('woff2');
-    font-weight: 300 700;
-    font-style: italic;
-    font-display: swap;
+  font-family: 'Erode';
+  src: url('/fonts/Erode-VariableItalic.woff2') format('woff2');
+  font-weight: 300 700;
+  font-style: italic;
+  font-display: swap;
 }
 
 @font-face {
-    font-family: 'Plus Jakarta Sans';
-    src: url('/fonts/PlusJakartaSans-Variable.woff2') format('woff2-variations');
-    font-weight: 200 800;
-    font-style: normal;
-    font-display: swap;
+  font-family: 'Plus Jakarta Sans';
+  src: url('/fonts/PlusJakartaSans-Variable.woff2') format('woff2-variations');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
 }
 
 @theme {
-    --font-sans: 'Plus Jakarta Sans', sans-serif;
-    --font-display: 'Erode', serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Erode', serif;
 }
 
 @utility glass {
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 12px 48px rgba(99, 102, 241, 0.18);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 12px 48px rgba(99, 102, 241, 0.18);
 
-    @variant dark {
-        background: rgba(30, 30, 30, 0.45);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 48px rgba(99, 102, 241, 0.14);
-    }
+  @variant dark {
+    background: rgba(30, 30, 30, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 48px rgba(99, 102, 241, 0.14);
+  }
 }
 
 @utility header-fade {
-    position: relative;
-    background: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+  position: relative;
+  background: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+      to bottom,
+      oklch(97.1% 0.003 264.54 / 90%) 0%,
+      oklch(97.1% 0.003 264.54 / 60%) 60%,
+      transparent 100%
+    );
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  }
+
+  @variant dark {
     &::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        z-index: -1;
-        background: linear-gradient(
-            to bottom,
-            oklch(97.1% 0.003 264.54 / 90%) 0%,
-            oklch(97.1% 0.003 264.54 / 60%) 60%,
-            transparent 100%
-        );
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-        -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+      background: linear-gradient(
+        to bottom,
+        oklch(14.5% 0.003 264.54 / 90%) 0%,
+        oklch(14.5% 0.003 264.54 / 60%) 60%,
+        transparent 100%
+      );
     }
-
-    @variant dark {
-        &::before {
-            background: linear-gradient(
-                to bottom,
-                oklch(14.5% 0.003 264.54 / 90%) 0%,
-                oklch(14.5% 0.003 264.54 / 60%) 60%,
-                transparent 100%
-            );
-        }
-    }
+  }
 }
 
 @utility app-bg {
-    background-color: oklch(97.1% 0.003 264.54); /* fallback = neutral-50 */
-    background-image: url('/images/light-bg.svg');
-    background-size: cover;
-    background-position: center top;
-    background-attachment: fixed;
-    @variant dark {
-        background-color: oklch(14.5% 0.003 264.54); /* fallback = neutral-950 */
-        background-image: url('/images/dark-bg.svg');
-    }
+  background-color: oklch(97.1% 0.003 264.54); /* fallback = neutral-50 */
+  background-image: url('/images/light-bg.svg');
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
+
+  @variant dark {
+    background-color: oklch(14.5% 0.003 264.54); /* fallback = neutral-950 */
+    background-image: url('/images/dark-bg.svg');
+  }
 }
