@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useState, type Ref } from "react";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 
-export function AuthModal() {
+interface AuthModalProps {
+  ref?: Ref<HTMLDivElement>
+}
+
+export function AuthModal({ref}:AuthModalProps) {
   const { closeAuthModal } = useAuth();
   const [view, setView] = useState<"login" | "register1" | "register2">(
     "login",
@@ -62,7 +66,7 @@ export function AuthModal() {
     "mx-auto w-full max-w-28 px-1 py-1 text-xs text-slate-500 transition-colors hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400";
 
   return (
-    <div className="glass flex w-full max-w-80 flex-col rounded-3xl p-6 dark:bg-slate-900/40">
+    <div ref={ref} className="glass flex w-full max-w-80 flex-col rounded-3xl p-6 dark:bg-slate-900/40">
       <div className="flex w-full flex-row justify-around gap-3">
         <button
           className={

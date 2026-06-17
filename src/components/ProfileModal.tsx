@@ -1,6 +1,10 @@
+// --- IMPORTS ---
+import { LogOutIcon, UserRoundIcon, LibraryIcon } from "lucide-react";
+
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 
+// --- HANDLERS ---
 async function handleLogout() {
   const { error } = await supabase.auth.signOut();
 
@@ -8,12 +12,8 @@ async function handleLogout() {
     console.error("Error logging out:", error.message);
     return;
   }
-
-  // Optional: Redirect your user or update state here
-  console.log("Successfully logged out");
 }
 
-// Passamos o email como prop para manter o componente puro e simples
 function UserMenu({
   email,
   username,
@@ -22,48 +22,80 @@ function UserMenu({
   username: string | undefined;
 }) {
   return (
-    <div className="flex flex-col items-center gap-1 p-4">
-      <h3 className="font-display text-2xl font-bold">Hello {username}!</h3>
-      <p className="text-violet-500 opacity-60">{email}</p>
-      <button
-        onClick={handleLogout}
-        className="mt-2 text-sm text-red-500 hover:underline"
-      >
-        Logout
-      </button>
+    <div className="flex w-64 flex-col gap-4 p-2">
+      <div className="flex flex-row items-center gap-3 border-b border-slate-200 pb-4 dark:border-slate-800">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+          <UserRoundIcon size={28} strokeWidth={1.5} />
+        </div>
+
+        <div className="flex min-w-0 flex-col">
+          <h3 className="font-display truncate text-xl font-bold text-slate-800 dark:text-slate-100">
+            {username || "User"}
+          </h3>
+          <p className="truncate text-sm text-slate-500 dark:text-slate-400">
+            {email}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <button className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-violet-500/10 hover:text-violet-600 dark:text-slate-300 dark:hover:text-violet-400">
+          <LibraryIcon size={18} />
+          My Shelf
+        </button>
+
+        <button
+          onClick={handleLogout}
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-500/10 dark:text-red-400"
+        >
+          <LogOutIcon size={18} />
+          Logout
+        </button>
+      </div>
     </div>
   );
 }
 
 function GuestMenu() {
-  // Chamamos o hook DENTRO do componente
   const { openAuthModal } = useAuth();
 
   return (
-    <div className="flex flex-col items-center gap-2 p-4">
-      <h3 className="font-display text-2xl font-bold">Not logged</h3>
-      <button
-        onClick={openAuthModal} // Conectamos a ação de abrir o modal aqui!
-        className="rounded-full bg-violet-500 px-6 py-2 text-sm text-white transition-colors hover:bg-violet-600"
-      >
-        Login
-      </button>
-      <button
-        onClick={openAuthModal} // Pode abrir o mesmo modal, já que tem abas
-        className="text-sm opacity-70 transition-opacity hover:opacity-100"
-      >
-        Sign Up
-      </button>
+    <div className="flex w-56 flex-col items-center gap-4 p-4 text-center">
+      <div className="flex flex-col items-center gap-1">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+          <UserRoundIcon size={24} strokeWidth={1.5} />
+        </div>
+        <h3 className="font-display text-lg font-bold text-slate-800 dark:text-slate-100">
+          Not logged in
+        </h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Sign in to save your books.
+        </p>
+      </div>
+
+      <div className="flex w-full flex-col gap-2">
+        <button
+          onClick={openAuthModal}
+          className="w-full rounded-full bg-violet-500 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-600"
+        >
+          Login
+        </button>
+        <button
+          onClick={openAuthModal}
+          className="w-full rounded-full px-6 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          Sign Up
+        </button>
+      </div>
     </div>
   );
 }
 
 export function ProfileModal() {
-  // Chamamos o hook DENTRO do componente principal
   const { session } = useAuth();
 
   return (
-    <div className="glass absolute top-15 right-6 z-40 flex flex-col items-center gap-2 rounded-3xl p-2">
+    <div className="glass absolute top-12 right-0 z-40 mt-2 flex flex-col items-center rounded-3xl border border-white/40 bg-white/95 p-1 shadow-xl shadow-violet-500/10 dark:border-white/10 dark:bg-neutral-900/95">
       {session ? (
         <UserMenu
           email={session.user?.email}

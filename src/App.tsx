@@ -6,9 +6,13 @@ import { BookDetails } from "./pages/BookDetails";
 import { SearchResults } from "./pages/SearchResults";
 import { useAuth } from "./context/AuthContext";
 import { AuthModal } from "./components/AuthModal";
+import { useRef } from "react";
+import { useOnClickOutside } from "./hooks/useOnClickOutside";
 
 function App() {
-  const { isAuthModalOpen } = useAuth();
+  const { isAuthModalOpen, closeAuthModal  } = useAuth();
+  const modalRef = useRef <HTMLDivElement>(null)
+  useOnClickOutside(modalRef, closeAuthModal)
 
   return (
     <BrowserRouter>
@@ -51,7 +55,7 @@ function App() {
 
           {isAuthModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-slate-950/70 backdrop-blur-sm">
-              <AuthModal />
+              <AuthModal ref={modalRef}/>
             </div>
           )}
         </div>

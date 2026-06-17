@@ -2,8 +2,9 @@ import { Link, useLocation } from "react-router-dom";
 import { useThemeContext } from "../context/ThemeContext";
 import { MoonIcon, SunIcon, UserRoundIcon } from "lucide-react";
 import { SearchBar } from "./SearchBar";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ProfileModal } from "./ProfileModal";
+import { useOnClickOutside } from "../hooks/useOnClickOutside";
 
 export function Header() {
   const { theme, toggleTheme } = useThemeContext();
@@ -11,6 +12,9 @@ export function Header() {
   const isHome = location.pathname === "/";
   const showSearch = !isHome;
   const [showProfile, setShowProfile] = useState<boolean>(false);
+  const profileContainerRef = useRef <HTMLDivElement>(null)
+  useOnClickOutside (profileContainerRef,()=>{setShowProfile(false)})
+
 
   return (
     <header className="header-fade fixed inset-x-0 top-0 z-50 h-30">
@@ -37,14 +41,16 @@ export function Header() {
         >
           {theme === "dark" ? <SunIcon /> : <MoonIcon />}
         </button>
-        <button
-          onClick={() => setShowProfile(!showProfile)}
-          aria-label="Profile"
-          className="ml-1 size-8 shrink-0 rounded-full p-1.5 text-slate-500 transition-all hover:text-violet-500 dark:text-slate-400"
-        >
-          <UserRoundIcon />
-        </button>
-        {showProfile && <ProfileModal/>}
+        <div ref={profileContainerRef} className="relative flex items-center">
+          <button
+            onClick={() => setShowProfile(!showProfile)}
+            aria-label="Profile"
+            className="ml-1 size-8 shrink-0 rounded-full p-1.5 text-slate-500 transition-all hover:text-violet-500 dark:text-slate-400"
+          >
+            <UserRoundIcon />
+          </button>
+          {showProfile && <ProfileModal />}
+        </div>
       </div>
     </header>
   );
