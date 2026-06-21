@@ -8,10 +8,11 @@ import { useAuth } from "./context/AuthContext";
 import { AuthModal } from "./components/AuthModal";
 import { useRef } from "react";
 import { useOnClickOutside } from "./hooks/useOnClickOutside";
+import { MyShelf } from "./pages/MyShelf";
 
 function App() {
-  const { isAuthModalOpen, closeAuthModal  } = useAuth();
-  const modalRef = useRef <HTMLDivElement>(null)
+  const { isAuthModalOpen, closeAuthModal } = useAuth();
+  const modalRef = useRef<HTMLDivElement>(null)
   useOnClickOutside(modalRef, closeAuthModal)
 
   return (
@@ -24,6 +25,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/book/:id" element={<BookDetails />} />
               <Route path="/search" element={<SearchResults />} />
+              <Route path="/myshelf" element={<MyShelf />} />
               {/* 404 Fallback Route  */}
               <Route
                 path="*"
@@ -43,7 +45,7 @@ function App() {
               />
             </Routes>
           </main>
-          <footer className="py-4 text-center text-xs text-slate-400">
+          <footer className="py-4 text-center text-sm text-slate-400">
             {"made with <📚💜/> by "}
             <a
               href="https://github.com/euvitor"
@@ -55,7 +57,7 @@ function App() {
 
           {isAuthModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-slate-950/70 backdrop-blur-sm">
-              <AuthModal ref={modalRef}/>
+              <AuthModal ref={modalRef} />
             </div>
           )}
         </div>

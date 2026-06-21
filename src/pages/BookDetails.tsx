@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
-import type { Book } from "../types/book";
 import { useEffect, useState } from "react";
-import { getBookById } from "../services/googleBooks";
 import { ShareIcon, ShoppingCartIcon } from "lucide-react";
+import type { Book } from "../types/book";
+import { getBookById } from "../services/googleBooks";
 import { StarRating } from "../components/StarRating";
 
 export function BookDetails() {
