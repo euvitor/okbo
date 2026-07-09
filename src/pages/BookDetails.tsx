@@ -4,13 +4,16 @@ import { ShareIcon, ShoppingCartIcon } from "lucide-react";
 import type { Book } from "../types/book";
 import { getBookById } from "../services/googleBooks";
 import { StarRating } from "../components/StarRating";
+import { ShelfManager } from "../components/ShelfManager";
+import { useAuth } from "../context/AuthContext";
 
 export function BookDetails() {
+  const { session } = useAuth()
   const { id } = useParams();
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const AMAZON_AFFILIATE_TAG = "euvitordev-20";
+  const AMAZON_AFFILIATE_TAG = "vitordev01-20";
 
   const fetchBook = async () => {
     setLoading(true);
@@ -59,7 +62,7 @@ export function BookDetails() {
   return (
     <div className="mx-auto max-w-300 px-6 py-8">
       <div className="flex flex-col items-start gap-8 md:flex-row">
-        {/* Capa */}
+        {/* Cover */}
         <div className="w-full shrink-0 md:w-64">
           {book.coverUrl ? (
             <img
@@ -75,7 +78,7 @@ export function BookDetails() {
             </div>
           )}
         </div>
-        {/* Dados — coluna direita com glass */}
+        {/* Book data */}
         <div className="glass flex min-w-0 flex-1 flex-col gap-4 rounded-3xl p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -86,11 +89,17 @@ export function BookDetails() {
                 </p>
               )}
             </div>
-            <div className="flex shrink-0 gap-2">
+            <div className="flex flex-col lg:flex-row">
+              <ShelfManager
+                bookId={book.id}
+                bookTitle={book.title}
+                bookCoverUrl={book.coverUrl}
+                userId={session?.user.id}
+              />
               <button
                 onClick={handleShare}
-                className="rounded-full p-2.5 text-slate-500 transition-colors hover:text-violet-500 dark:text-slate-400 dark:hover:text-violet-400"
-                title="Compartilhar"
+                className="rounded-full p-2.5 text-slate-500 transition-colors hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-400"
+                title="Share"
               >
                 <ShareIcon className="size-5" />
               </button>
@@ -99,7 +108,7 @@ export function BookDetails() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-full p-2.5 text-slate-500 transition-colors hover:text-amber-600 dark:text-slate-400 dark:hover:text-amber-400"
-                title="Comprar na Amazon"
+                title="Buy on Amazon"
               >
                 <ShoppingCartIcon className="size-5" />
               </a>
