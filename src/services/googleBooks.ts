@@ -6,7 +6,7 @@ import type {
 import type { OrderBy, SearchFilters } from "../types/search";
 
 function buildCoverUrl(
-  imageLinks?: GoogleBooksVolume["volumeInfo"]["imageLinks"],
+  imageLinks?: NonNullable<GoogleBooksVolume["volumeInfo"]>["imageLinks"],
 ): string | null {
   if (!imageLinks) return null;
   const raw =
@@ -66,6 +66,7 @@ export async function searchBooks(
   filters: SearchFilters,
   orderBy?: OrderBy,
   startIndex = 0,
+  signal?: AbortSignal,
   maxResults = 20,
 ): Promise<{ books: Book[]; totalItems: number }> {
   const apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY;
@@ -84,7 +85,7 @@ export async function searchBooks(
   });
 
   const response = await fetch(
-    `https://www.googleapis.com/books/v1/volumes?${params.toString()}`,
+    `https://www.googleapis.com/books/v1/volumes?${params.toString()}`,{signal}
   );
 
   if (!response.ok) throw new Error("Erro ao buscar livros");

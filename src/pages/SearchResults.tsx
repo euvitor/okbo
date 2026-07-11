@@ -22,28 +22,49 @@ export function SearchResults() {
   const [startIndex, setStartIndex] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
 
-  // Busca inicial — reseta tudo
+
   useEffect(() => {
+    // First search reset
     if (!query) {
-      setBooks([]);
-      setTotalItems(0);
-      setStartIndex(0);
-      return;
+      setBooks([])
+      setTotalItems(0)
+      setStartIndex(0)
+      return
     }
-    setLoading(true);
-    setStartIndex(0);
-    searchBooks(query, filters, orderBy, 0)
+
+    // creates abort controller and extracts its signal
+    const controller = new AbortController()
+    const signal = controller.signal
+
+    setLoading(true)
+    setStartIndex(0)
+
+    searchBooks(query, filters, orderBy, 0, signal)
       .then(({ books, totalItems }) => {
-        setBooks(books);
-        setTotalItems(totalItems);
-        setError(null);
+        setBooks(books)
+        setTotalItems(totalItems)
+        setError(null)
       })
       .catch((err) => {
-        console.error(err);
-        setError("Erro ao buscar livros");
+        // ignores React intentional abort
+        if (err.name === 'AbortError') {
+          console.log('Requisição anterior cancelada (Strict Mode).')
+          return
+        }
+        console.error(err)
+        setError('err')
+        setError('Erro ao buscar livros')
       })
-      .finally(() => setLoading(false));
-  }, [query, orderBy, field, lang]);
+      .finally(() => {
+        if (!signal.aborted) {
+          setLoading(false)
+        }
+      })
+
+    return () => {
+      controller.abort()
+    }
+  }, [query, orderBy, field, lang])
 
   const handleLoadMore = async () => {
     const nextIndex = startIndex + 20;
