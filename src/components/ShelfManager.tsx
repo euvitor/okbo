@@ -7,10 +7,10 @@ interface ShelfManagerProps {
     bookTitle: string;
     bookCoverUrl: string | null;
     userId: string | undefined;
+    onUpdate?: () => void;
 }
 
-
-export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfManagerProps) {
+export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate }: ShelfManagerProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [currentStatus, setCurrentStatus] = useState<string | null>(null);
     const [userBookId, setUserBookId] = useState<string | null>(null);
@@ -19,16 +19,16 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [reviewText, setReviewText] = useState("");
 
+    // Standardized date format for database inserts
     const today = new Date().toISOString().split('T')[0]
 
     useEffect(() => {
-
         async function checkShelfStatus() {
             if (!userId || !bookId) return;
             try {
                 setIsLoading(true);
 
-                // Check if the book is already in the user's shelf
+                // 1. Verify if the book already exists in our internal database
                 const { data: bookData, error: bookError } = await supabase
                     .from("books")
                     .select("id")
@@ -42,7 +42,7 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
                     return;
                 }
 
-                // Check if the book is already in the user's shelf
+                // 2. Verify if the user has already added this book to their shelf
                 const { data: userBookData, error: userBookError } = await supabase
                     .from("user_books")
                     .select("id, status")
@@ -52,14 +52,13 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
 
                 if (userBookError) throw userBookError;
 
-                // If the book exists in user shelf, stores ID and status
+                // 3. Hydrate local state if a relationship exists
                 if (userBookData) {
                     setUserBookId(userBookData.id);
                     setCurrentStatus(userBookData.status);
                 } else {
                     setCurrentStatus(null);
                 }
-
             } catch (error) {
                 console.error("Can't fetch shelf status:", error);
                 setCurrentStatus(null);
@@ -69,23 +68,25 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
         }
 
         checkShelfStatus();
-
     }, [bookId, userId]);
 
     // --- HANDLERS ---
+
+    // Manages the complex relational insertion: Book -> User_Book -> Reading_Session
     const handleSelectStatus = async (newStatus: string) => {
         if (!userId) return
 
         try {
             setIsLoading(true)
 
-            // Check if book exists, if don't, creates and gets the new book id
+            // Step 1: Ensure the book exists in our DB, otherwise create it
             let internalBookId = null
             const { data: existingBook, error: checkError } = await supabase
                 .from('books')
                 .select('id')
                 .eq('google_api_id', bookId)
                 .maybeSingle()
+
             if (checkError) throw checkError
 
             if (existingBook) {
@@ -105,11 +106,10 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
                 internalBookId = newBook.id
             }
 
-            // Check it's stats on shelf (user_books)
-            let currentUserBookId = userBookId // Gets from state if exists
+            // Step 2: Upsert the user_books relationship
+            let currentUserBookId = userBookId
 
             if (!currentUserBookId) {
-
                 const { data: existingUserBook } = await supabase
                     .from('user_books')
                     .select('id')
@@ -125,7 +125,6 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
                         .eq('id', currentUserBookId)
 
                     if (updateError) throw updateError
-
                 } else {
                     const { data: newUserBook, error: insertUserBookError } = await supabase
                         .from('user_books')
@@ -149,6 +148,7 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
                 if (updateError) throw updateError
             }
 
+            // Step 3: Manage Reading Sessions based on the target status
             const { data: openSession } = await supabase
                 .from('reading_sessions')
                 .select('id')
@@ -156,12 +156,13 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
                 .is('end_date', null)
                 .maybeSingle()
 
-            // Want to Read and DNF(dropped) always deletes incomplete sessions
+            // If moving to "Want to Read" or "DNF", we abandon any incomplete active sessions
             if (newStatus === 'want_to_read' || newStatus === 'dropped') {
                 if (openSession) {
                     await supabase.from('reading_sessions').delete().eq('id', openSession.id)
                 }
             }
+            // If moving to "Reading", we start a new session (if one isn't already open)
             else if (newStatus === 'reading') {
                 if (!openSession) {
                     await supabase.from('reading_sessions').insert({
@@ -171,13 +172,19 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
                 }
             }
 
+            // Update UI state
             setUserBookId(currentUserBookId)
             setCurrentStatus(newStatus)
             setIsMenuOpen(false)
 
+            // Step 4: If finished, prompt for a review before triggering the refresh
             if (newStatus === 'read') {
                 setIsReviewModalOpen(true)
+            } else {
+                // If not reviewing, trigger the update to refresh the BookDetails timeline immediately
+                onUpdate?.()
             }
+
         } catch (error) {
             console.error('Error saving book: ', error)
             alert('Could not save the book. Please try again.')
@@ -186,44 +193,46 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
         }
     }
 
-
-    const handleSaveReview = async () => {
+    const handleSaveReview = async (isSave: boolean) => {
         if (!userBookId) return
 
         setIsLoading(true)
 
-        try{
-            const {data: openSession} = await supabase
-            .from('reading_sessions')
-            .select('id')
-            .eq('user_book_id', userBookId)
-            .is('end_date', null)
-            .maybeSingle()
-
-            if(openSession){
-                const{error: updateError} = await supabase
+        try {
+            const { data: openSession } = await supabase
                 .from('reading_sessions')
-                .update({
-                    end_date: today,
-                    review: reviewText || null
-                })
-                .eq('user_book_id',openSession.id)
+                .select('id')
+                .eq('user_book_id', userBookId)
+                .is('end_date', null)
+                .maybeSingle()
 
-                if(updateError) throw updateError
+            if (openSession) {
+                const { error: updateError } = await supabase
+                    .from('reading_sessions')
+                    .update({
+                        end_date: today,
+                        review: isSave ? (reviewText || null) : null
+                    })
+                    .eq('id', openSession.id)
+
+                if (updateError) throw updateError
             } else {
-                const {error: insertError} = await supabase
-                .from ('reading_sessions')
-                .insert({
-                    user_book_id: userBookId,
-                    end_date: today,
-                    review: reviewText || null
-                })
+                // Edge case: User clicked "Read" directly without ever clicking "Reading" first
+                const { error: insertError } = await supabase
+                    .from('reading_sessions')
+                    .insert({
+                        user_book_id: userBookId,
+                        start_date: today, // Fallback start_date to today
+                        end_date: today,
+                        review: isSave ? (reviewText || null) : null
+                    })
 
-                if(insertError) throw insertError
+                if (insertError) throw insertError
             }
 
             setReviewText('')
-        } catch (error){
+            onUpdate?.() // Refresh BookDetails timeline
+        } catch (error) {
             console.error('Error saving review: ', error);
             alert('Could not save the book review.');
         } finally {
@@ -238,6 +247,8 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
         setIsLoading(true)
 
         try {
+            // Due to ON DELETE CASCADE, removing the user_book will automatically 
+            // wipe all associated reading_sessions from the database.
             const { error: removeError } = await supabase
                 .from('user_books')
                 .delete()
@@ -247,19 +258,20 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
 
             setCurrentStatus(null)
             setUserBookId(null)
+            setIsMenuOpen(false)
+
+            onUpdate?.() // Refresh BookDetails timeline
         } catch (error) {
             console.log('Error removing from shelf:, ', error)
             alert('Could not remove from shelf.')
         } finally {
             setIsLoading(false)
-            setIsReviewModalOpen(false)
         }
     };
 
-
     return (
         <div className="relative">
-            {/* --- 1. BOTÃO PRINCIPAL --- */}
+            {/* --- 1. MAIN TRIGGER BUTTON --- */}
             <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 disabled={isLoading}
@@ -277,14 +289,14 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
             {/* --- 2. DROPDOWN MENU --- */}
             {isMenuOpen && (
                 <>
-                    {/* Overlay invisível para fechar o menu ao clicar fora */}
+                    {/* Invisible backdrop to catch outside clicks and close the menu */}
                     <div
                         className="fixed inset-0 z-40"
                         onClick={() => setIsMenuOpen(false)}
                     ></div>
 
                     <div className="absolute right-0 top-14 z-50 flex w-56 flex-col overflow-hidden rounded-2xl glass border border-white/20 bg-white/90 p-1 shadow-xl dark:border-white/10 dark:bg-neutral-900/90">
-                        {/* Opções de Leitura */}
+                        {/* Reading Status Options */}
                         {[
                             { id: "want_to_read", label: "Want to Read" },
                             { id: "reading", label: "Reading" },
@@ -301,13 +313,13 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
                             </button>
                         ))}
 
-                        {/* Botão de Remover (Apenas se já estiver na estante) */}
+                        {/* Destructive Action (Only visible if the book is saved) */}
                         {currentStatus && (
                             <>
                                 <div className="my-1 h-px bg-slate-200 dark:bg-white/10"></div>
                                 <button
                                     onClick={handleRemoveFromShelf}
-                                    className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10"
+                                    className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 transition-colors hover:bg-red-500/10 dark:text-red-400"
                                 >
                                     <Trash2 size={16} />
                                     Remove from Shelf
@@ -318,16 +330,16 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
                 </>
             )}
 
-            {/* --- 3. MODAL DE REVIEW (Abre ao escolher "Read") --- */}
+            {/* --- 3. REVIEW MODAL (Triggers when status becomes "Read") --- */}
             {isReviewModalOpen && (
-                <div className="fixed inset-0 z-60 flex items-center justify-center bg-white/20 dark:bg-black/20 rounded-3xl">
+                <div className="fixed inset-0 z-60 flex items-center justify-center bg-white/20 backdrop-blur-sm dark:bg-black/40">
                     <div className="w-full max-w-md rounded-3xl glass bg-white/95 p-6 shadow-2xl dark:bg-neutral-900/95 flex flex-col gap-4">
                         <div className="flex items-center justify-between">
                             <h3 className="font-display text-xl font-bold text-slate-800 dark:text-slate-100">
                                 You finished it! 🎉
                             </h3>
                             <button
-                                onClick={() => setIsReviewModalOpen(false)}
+                                onClick={() => handleSaveReview(false)}
                                 className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                             >
                                 <X size={20} />
@@ -347,13 +359,13 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId }: ShelfM
 
                         <div className="flex gap-2 mt-2">
                             <button
-                                onClick={() => setIsReviewModalOpen(false)}
-                                className="flex-1 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
+                                onClick={() => handleSaveReview(false)}
+                                className="flex-1 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
                             >
                                 Skip
                             </button>
                             <button
-                                onClick={handleSaveReview}
+                                onClick={() => handleSaveReview(true)}
                                 disabled={isLoading}
                                 className="flex-1 rounded-full bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700 transition-colors flex items-center justify-center"
                             >
