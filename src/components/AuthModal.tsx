@@ -6,7 +6,7 @@ interface AuthModalProps {
   ref?: Ref<HTMLDivElement>
 }
 
-export function AuthModal({ref}:AuthModalProps) {
+export function AuthModal({ ref }: AuthModalProps) {
   const { closeAuthModal } = useAuth();
   const [view, setView] = useState<"login" | "register1" | "register2">(
     "login",
@@ -21,7 +21,7 @@ export function AuthModal({ref}:AuthModalProps) {
     e.preventDefault();
     setErrorMsg("");
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
     });
@@ -41,7 +41,7 @@ export function AuthModal({ref}:AuthModalProps) {
     e.preventDefault();
     setErrorMsg("");
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email: email,
       password: password,
       options: {
