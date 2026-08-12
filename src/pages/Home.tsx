@@ -2,7 +2,7 @@ import { SearchBar } from "../components/SearchBar";
 
 export function Home() {
   return (
-    <div className="flex h-full flex-1 flex-col items-center justify-center">
+    <div className="flex h-full flex-1 flex-col items-center justify-center -mt-14">
       <h1 className="font-display text-6xl font-bold">
         okbo<span className="text-violet-500">.</span>
       </h1>
