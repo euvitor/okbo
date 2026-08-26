@@ -83,7 +83,13 @@ export function ProfilePic({ userId, avatarUrl, onUploadSuccess }: ProfilePicPro
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
             ) : (
-                <div className="w-full h-full bg-white/5 flex items-center justify-center text-gray-500 dark:text-gray-400">
+                <div
+                    className="w-full h-full flex items-center justify-center"
+                    style={{
+                        background: "var(--color-paper-sunken)",
+                        color: "var(--color-ink-faint)",
+                    }}
+                >
                     <span className="text-sm font-medium">No Photo</span>
                 </div>
             )}

@@ -1,8 +1,9 @@
 import { BookCard } from "./BookCard";
 import type { Book } from "../types/book";
-import { BookPlus } from "lucide-react";
-import { Link } from "react-router-dom";
 
+// Represents the joined data structure returned by Supabase (user_books + books).
+// Note: In the future, if this interface is shared across multiple files,
+// we should move it to our types/database.type.ts file.
 export interface UserBookDetails {
   id: string;
   status: string;
@@ -17,48 +18,40 @@ export interface UserBookDetails {
 
 interface ShelfRowProps {
   title: string;
-  icon?: string;
-  badgeColor?: string;
   userBooks: UserBookDetails[];
 }
 
-export function ShelfRow({ title, icon, badgeColor = "bg-violet-500/10 text-violet-600 border-violet-500/20", userBooks }: ShelfRowProps) {
+export function ShelfRow({ title, userBooks }: ShelfRowProps) {
   return (
-    <section className="flex flex-col gap-4">
-      {/* Section Header */}
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-2.5">
-          {icon && <span className="text-xl">{icon}</span>}
-          <h3
-            className="text-2xl font-bold tracking-tight"
-            style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
-          >
-            {title}
-          </h3>
-          <span className={`rounded-full border px-2.5 py-0.5 text-xs font-bold ${badgeColor}`}>
-            {userBooks.length}
-          </span>
-        </div>
+    <section className="flex flex-col gap-3.5">
+      {/* Section header */}
+      <div className="flex items-baseline gap-2.5">
+        <h4
+          className="text-xl font-bold"
+          style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
+        >
+          {title}
+        </h4>
+        <span className="text-base font-medium" style={{ color: "var(--color-ink-faint)" }}>
+          {userBooks.length}
+        </span>
       </div>
 
       {userBooks.length === 0 ? (
-        /* Empty State */
-        <div className="glass flex flex-col items-center justify-center gap-2.5 rounded-3xl border-2 border-dashed border-slate-300/80 p-8 text-center dark:border-white/10">
-          <BookPlus className="size-8 text-slate-400 dark:text-slate-500" />
-          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
-            Nenhum livro nesta estante ainda.
+        /* Empty state */
+        <div
+          className="flex h-36 w-full items-center justify-center rounded-2xl border border-dashed"
+          style={{ borderColor: "var(--color-border-mid)" }}
+        >
+          <p className="text-base" style={{ color: "var(--color-ink-faint)" }}>
+            No books here yet.
           </p>
-          <Link
-            to="/"
-            className="text-xs font-bold text-violet-600 hover:underline dark:text-violet-400"
-          >
-            Pesquisar e adicionar livros →
-          </Link>
         </div>
       ) : (
-        /* Horizontal Scroll Carousel */
-        <div className="flex w-full snap-x snap-mandatory gap-5 overflow-x-auto pb-4 pt-1 px-1 scroll-smooth">
+        /* CSS Scroll Snap horizontal carousel */
+        <div className="flex w-full snap-x snap-mandatory gap-5 overflow-x-auto pb-4 pt-1">
           {userBooks.map((item) => {
+            // Hydrate minimal Supabase data into the full Book interface
             const adaptedBook: Book = {
               id: item.books.google_api_id,
               title: item.books.title,
@@ -75,7 +68,7 @@ export function ShelfRow({ title, icon, badgeColor = "bg-violet-500/10 text-viol
             };
 
             return (
-              <div key={item.id} className="min-w-44 max-w-48 snap-start shrink-0">
+              <div key={item.id} className="min-w-40 max-w-48 snap-start">
                 <BookCard book={adaptedBook} viewMode="grid" />
               </div>
             );

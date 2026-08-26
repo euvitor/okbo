@@ -4,19 +4,19 @@ import type { Book } from "../types/book";
 import { searchBooks } from "../services/googleBooks";
 import type { OrderBy, SearchField, SearchFilters } from "../types/search";
 import { BookCard } from "../components/BookCard";
-import { LayoutGridIcon, ListIcon, LoaderCircleIcon, SearchXIcon } from "lucide-react";
+import { LayoutGridIcon, ListIcon, LoaderCircleIcon } from "lucide-react";
 
 /* Skeleton for a single book card in grid mode */
 function BookSkeleton() {
   return (
-    <div className="glass flex flex-col gap-3 rounded-3xl p-3 animate-pulse">
+    <div className="flex flex-col gap-2.5 animate-pulse">
       <div
         className="aspect-[2/3] rounded-2xl"
         style={{ background: "var(--color-paper-sunken)" }}
       />
-      <div className="flex flex-col gap-2 px-1">
-        <div className="h-4 w-4/5 rounded-full" style={{ background: "var(--color-paper-sunken)" }} />
-        <div className="h-3 w-1/2 rounded-full" style={{ background: "var(--color-paper-sunken)" }} />
+      <div className="flex flex-col gap-1.5 px-0.5">
+        <div className="h-3 w-3/4 rounded-full" style={{ background: "var(--color-paper-sunken)" }} />
+        <div className="h-2.5 w-1/2 rounded-full" style={{ background: "var(--color-paper-sunken)" }} />
       </div>
     </div>
   );
@@ -87,7 +87,7 @@ export function SearchResults() {
   /* ── States ── */
   if (loading) {
     return (
-      <div className="mt-6 grid grid-cols-2 gap-5 px-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      <div className="mt-6 grid grid-cols-2 gap-3.5 px-2 sm:gap-6 sm:px-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {Array.from({ length: 10 }).map((_, i) => <BookSkeleton key={i} />)}
       </div>
     );
@@ -95,13 +95,10 @@ export function SearchResults() {
 
   if (!query) {
     return (
-      <div className="glass mx-auto my-12 flex max-w-md flex-col items-center gap-4 rounded-3xl p-10 text-center">
-        <span className="text-5xl">📚</span>
-        <h3 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
-          Pesquisa literária
-        </h3>
-        <p className="text-sm" style={{ color: "var(--color-ink-muted)" }}>
-          Digite um termo na barra de busca para encontrar livros, autores ou assuntos.
+      <div className="flex flex-col items-center gap-3.5 py-24 px-4 text-center">
+        <p className="text-5xl" role="img" aria-label="search">🔍</p>
+        <p className="text-base" style={{ color: "var(--color-ink-muted)" }}>
+          Type something to search for books.
         </p>
       </div>
     );
@@ -109,22 +106,18 @@ export function SearchResults() {
 
   if (error) {
     return (
-      <div className="glass mx-auto my-12 flex max-w-md flex-col items-center gap-4 rounded-3xl p-10 text-center">
-        <span className="text-5xl text-rose-500">⚠️</span>
-        <p className="text-sm font-medium text-rose-600 dark:text-rose-400">{error}</p>
+      <div className="flex flex-col items-center gap-3.5 py-24 px-4 text-center">
+        <p className="text-base" style={{ color: "var(--color-ink-muted)" }}>{error}</p>
       </div>
     );
   }
 
   if (books.length === 0) {
     return (
-      <div className="glass mx-auto my-12 flex max-w-md flex-col items-center gap-4 rounded-3xl p-10 text-center">
-        <SearchXIcon className="size-12 text-violet-400" />
-        <h3 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>
-          Nenhum resultado encontrado
-        </h3>
-        <p className="text-sm" style={{ color: "var(--color-ink-muted)" }}>
-          Não encontramos livros para <span className="font-semibold text-violet-600 dark:text-violet-400">"{query}"</span>. Tente outras palavras-chave ou ajuste os filtros.
+      <div className="flex flex-col items-center gap-3.5 py-24 px-4 text-center">
+        <p className="text-5xl" role="img" aria-label="empty">📭</p>
+        <p className="text-base" style={{ color: "var(--color-ink-muted)" }}>
+          No books found for <span className="font-medium" style={{ color: "var(--color-ink)" }}>"{query}"</span>.
         </p>
       </div>
     );
@@ -134,52 +127,48 @@ export function SearchResults() {
   return (
     <>
       {/* Header bar */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 px-2">
-        <div className="flex items-center gap-2">
-          <span className="text-base font-medium" style={{ color: "var(--color-ink-muted)" }}>
-            <span className="font-bold text-violet-600 dark:text-violet-400">{totalItems.toLocaleString()}</span> resultados para{" "}
-            <span className="font-bold" style={{ color: "var(--color-ink)" }}>
-              "{query}"
-            </span>
+      <div className="mb-5 sm:mb-6 flex items-center justify-between px-2 sm:px-6">
+        <p className="text-sm sm:text-base truncate pr-2" style={{ color: "var(--color-ink-muted)" }}>
+          {totalItems.toLocaleString()} result{totalItems !== 1 ? "s" : ""} for{" "}
+          <span className="font-semibold" style={{ color: "var(--color-ink)" }}>
+            "{query}"
           </span>
-        </div>
+        </p>
 
         {/* View toggle */}
-        <div className="glass-pill flex gap-1 rounded-full p-1 shadow-sm">
+        <div className="glass flex gap-1 rounded-full p-1 shadow-sm shrink-0">
           <button
             onClick={() => setViewMode("grid")}
-            aria-label="Visualização em Grade"
-            className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 ${
-              viewMode === "grid"
-                ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
-                : "text-slate-600 hover:text-violet-600 dark:text-slate-400 dark:hover:text-violet-300"
-            }`}
+            aria-label="Grid view"
+            className={`rounded-full p-2 sm:p-2.5 transition-all duration-150 ${viewMode === "grid" ? "text-white" : "hover:bg-black/5 dark:hover:bg-white/8"
+              }`}
+            style={{
+              background: viewMode === "grid" ? "var(--color-accent)" : "transparent",
+              color: viewMode === "grid" ? "white" : "var(--color-ink-muted)",
+            }}
           >
             <LayoutGridIcon className="size-4" />
-            <span className="hidden sm:inline">Grade</span>
           </button>
-
           <button
             onClick={() => setViewMode("list")}
-            aria-label="Visualização em Lista"
-            className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 ${
-              viewMode === "list"
-                ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
-                : "text-slate-600 hover:text-violet-600 dark:text-slate-400 dark:hover:text-violet-300"
-            }`}
+            aria-label="List view"
+            className={`rounded-full p-2 sm:p-2.5 transition-all duration-150`}
+            style={{
+              background: viewMode === "list" ? "var(--color-accent)" : "transparent",
+              color: viewMode === "list" ? "white" : "var(--color-ink-muted)",
+            }}
           >
             <ListIcon className="size-4" />
-            <span className="hidden sm:inline">Lista</span>
           </button>
         </div>
       </div>
 
-      {/* Book Grid / List */}
+      {/* Book grid / list */}
       <div
         className={
           viewMode === "grid"
-            ? "grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 sm:gap-6"
-            : "flex flex-col gap-4"
+            ? "grid grid-cols-2 gap-3.5 px-2 sm:gap-6 sm:px-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+            : "flex flex-col gap-3.5 px-2 sm:gap-4 sm:px-6"
         }
       >
         {books.map((book) => (
@@ -187,21 +176,22 @@ export function SearchResults() {
         ))}
       </div>
 
-      {/* Load More Button */}
+      {/* Load more */}
       {books.length < totalItems && (
         <div className="mt-12 mb-8 flex justify-center">
           <button
             onClick={handleLoadMore}
             disabled={loadingMore}
-            className="glass-pill flex items-center gap-2.5 rounded-full px-8 py-3 text-sm font-bold text-violet-700 shadow-md transition-all duration-300 hover:scale-105 hover:bg-violet-600 hover:text-white dark:text-violet-300 dark:hover:bg-violet-600 dark:hover:text-white disabled:opacity-50"
+            className="glass flex items-center gap-2.5 rounded-full px-8 py-3 text-base sm:text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-50 active:translate-y-0"
+            style={{ color: "var(--color-ink-muted)" }}
           >
             {loadingMore ? (
               <>
                 <LoaderCircleIcon className="size-4.5 animate-spin" />
-                <span>Carregando livros...</span>
+                Loading…
               </>
             ) : (
-              <span>Carregar mais livros</span>
+              "Load more"
             )}
           </button>
         </div>

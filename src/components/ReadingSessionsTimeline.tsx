@@ -66,7 +66,9 @@ export function ReadingSessionTimeline({ bookId, userId, refreshTrigger }: Timel
     if (isLoading) {
         return (
             <div className="mt-12 flex justify-center">
-                <span className="text-sm text-slate-400 animate-pulse">Loading journey...</span>
+                <span className="text-sm animate-pulse" style={{ color: "var(--color-ink-muted)" }}>
+                    Loading journey...
+                </span>
             </div>
         )
     }
@@ -84,28 +86,31 @@ export function ReadingSessionTimeline({ bookId, userId, refreshTrigger }: Timel
 
     return (
         <div className="mt-12 flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h3 className="font-display text-xl font-bold text-slate-800 dark:text-slate-100">
+            <h3
+                className="text-2xl font-bold"
+                style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
+            >
                 Reading Journey
             </h3>
 
             {/* Timeline vertical line */}
-            <div className="relative flex flex-col gap-8 border-l-2 border-violet-500/20 pl-6 dark:border-violet-500/30 ml-2">
+            <div className="relative flex flex-col gap-6 sm:gap-8 border-l-2 border-violet-500/20 pl-4 sm:pl-6 dark:border-violet-500/30 ml-3 sm:ml-4">
                 {sessions.map((session) => (
                     <div key={session.id} className="relative">
 
                         {/* Timeline dot */}
-                        <div className="absolute -left-7.75 top-1.5 h-3.5 w-3.5 rounded-full bg-violet-500 ring-4 ring-slate-50 dark:ring-neutral-900" />
+                        <div className="absolute -left-[1.55rem] sm:-left-8.5 top-2 h-3.5 w-3.5 sm:h-4 sm:w-4 rounded-full bg-violet-500 ring-4 ring-[var(--color-paper)] shadow-sm" />
 
                         {/* Liquid Glass Card */}
-                        <div className="glass flex flex-col gap-3 rounded-3xl p-5 shadow-sm">
-                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+                        <div className="glass flex flex-col gap-3 sm:gap-3.5 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-md">
+                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-base font-medium" style={{ color: "var(--color-ink-muted)" }}>
                                 <div className="flex items-center gap-2">
-                                    <CalendarIcon size={16} className="text-violet-500" />
+                                    <CalendarIcon size={18} style={{ color: "var(--color-accent)" }} />
                                     <span>Started: {formatDate(session.start_date)}</span>
                                 </div>
                                 {session.end_date && (
                                     <div className="flex items-center gap-2">
-                                        <CheckCircle2Icon size={16} className="text-green-500" />
+                                        <CheckCircle2Icon size={18} className="text-emerald-600 dark:text-emerald-400" />
                                         <span>Finished: {formatDate(session.end_date)}</span>
                                     </div>
                                 )}
@@ -113,16 +118,27 @@ export function ReadingSessionTimeline({ bookId, userId, refreshTrigger }: Timel
 
                             {/* User review */}
                             {session.review && (
-                                <div className="relative mt-2 rounded-2xl border border-white/20 bg-white/40 p-4 text-sm text-slate-700 dark:border-white/5 dark:bg-black/20 dark:text-slate-300">
-                                    <MessageSquareIcon size={16} className="absolute right-4 top-4 text-slate-300 dark:text-slate-600" />
-                                    <p className="pr-6 italic leading-relaxed">"{session.review}"</p>
+                                <div
+                                    className="relative mt-2 rounded-2xl border p-4 sm:p-4.5 text-base leading-relaxed"
+                                    style={{
+                                        background: "var(--color-paper-sunken)",
+                                        borderColor: "var(--color-border)",
+                                        color: "var(--color-ink)",
+                                    }}
+                                >
+                                    <MessageSquareIcon
+                                        size={18}
+                                        className="absolute right-4 top-4"
+                                        style={{ color: "var(--color-ink-faint)" }}
+                                    />
+                                    <p className="pr-8 italic">"{session.review}"</p>
                                 </div>
                             )}
 
                             {/* Open session badge */}
                             {!session.end_date && (
                                 <div className="mt-1">
-                                    <span className="inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                                    <span className="inline-flex items-center rounded-full bg-amber-500/15 border border-amber-500/20 px-3.5 py-1 text-sm font-semibold text-amber-700 dark:text-amber-300">
                                         Currently Reading
                                     </span>
                                 </div>

@@ -6,26 +6,23 @@ interface StarRatingProps {
 export function StarRating({ rating, count }: StarRatingProps) {
   if (!rating) return null;
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1">
       <div className="flex items-center gap-0.5">
         {[1, 2, 3, 4, 5].map((i) => (
           <span
             key={i}
-            className={`text-sm leading-none transition-transform ${
+            className={`text-sm sm:text-base leading-none ${
               i <= Math.round(rating)
-                ? "text-amber-500 drop-shadow-[0_1px_4px_rgba(245,158,11,0.4)]"
-                : "text-neutral-300 dark:text-neutral-700"
+                ? "text-amber-600 dark:text-amber-400"
+                : "text-[var(--color-ink-faint)]"
             }`}
           >
             ★
           </span>
         ))}
       </div>
-      <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
-        {rating.toFixed(1)}
-      </span>
-      {count !== undefined && count > 0 && (
-        <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
+      {count && (
+        <span className="text-xs sm:text-sm font-medium ml-0.5" style={{ color: "var(--color-ink-faint)" }}>
           ({count.toLocaleString()})
         </span>
       )}

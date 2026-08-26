@@ -1,5 +1,5 @@
 // --- IMPORTS ---
-import { LogOutIcon, UserRoundIcon, LibraryIcon, Sparkles } from "lucide-react";
+import { LogOutIcon, UserRoundIcon, LibraryIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
@@ -23,13 +23,23 @@ function UserMenu({
   profilePic: string | null | undefined;
 }) {
   const menuItemBase =
-    "flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-95";
+    "flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-[15px] sm:text-base font-medium transition-all duration-150 hover:bg-black/5 dark:hover:bg-white/6 active:scale-[0.98]";
 
   return (
-    <div className="flex w-64 flex-col gap-2 p-1.5">
+    <div className="flex w-[calc(100vw-2.5rem)] max-w-64 sm:w-64 flex-col gap-3.5 p-2.5">
       {/* User info */}
-      <div className="flex flex-row items-center gap-3 rounded-2xl bg-white/60 p-3 border border-white/70 shadow-sm dark:bg-neutral-800/50 dark:border-white/5">
-        <div className="flex size-12 shrink-0 overflow-hidden items-center justify-center rounded-full bg-gradient-to-tr from-violet-500 to-indigo-500 text-white shadow-md">
+      <div
+        className="flex flex-row items-center gap-3.5 border-b pb-3.5"
+        style={{ borderColor: "var(--color-border)" }}
+      >
+        <div
+          className="flex h-13 w-13 shrink-0 overflow-hidden items-center justify-center rounded-full shadow-sm"
+          style={{
+            background: "var(--color-paper-sunken)",
+            border: "1.5px solid var(--color-border-mid)",
+            color: "var(--color-ink-faint)",
+          }}
+        >
           {profilePic ? (
             <img
               src={profilePic}
@@ -37,39 +47,40 @@ function UserMenu({
               className="h-full w-full object-cover"
             />
           ) : (
-            <UserRoundIcon size={22} strokeWidth={2} />
+            <UserRoundIcon size={24} strokeWidth={1.5} />
           )}
         </div>
 
         <div className="flex min-w-0 flex-col">
           <h3
-            className="truncate text-base font-bold text-slate-800 dark:text-slate-100"
-            style={{ fontFamily: "var(--font-display)" }}
+            className="truncate text-base sm:text-lg font-semibold"
+            style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
           >
-            {username || "Leitor"}
+            {username || "User"}
           </h3>
-          <p className="truncate text-xs font-medium text-slate-500 dark:text-slate-400">
+          <p className="truncate text-xs sm:text-sm" style={{ color: "var(--color-ink-muted)" }}>
             {email}
           </p>
         </div>
       </div>
 
       {/* Menu items */}
-      <div className="flex flex-col gap-1 pt-1">
+      <div className="flex flex-col gap-1">
         <Link
           to="/myshelf"
-          className={`${menuItemBase} text-slate-700 hover:bg-violet-500/10 hover:text-violet-700 dark:text-slate-200 dark:hover:bg-violet-500/20 dark:hover:text-violet-300`}
+          className={menuItemBase}
+          style={{ color: "var(--color-ink-muted)" }}
         >
-          <LibraryIcon size={18} className="text-violet-600 dark:text-violet-400" />
-          <span>Minha Estante</span>
+          <LibraryIcon size={18} strokeWidth={1.75} />
+          My Shelf
         </Link>
 
         <button
           onClick={handleLogout}
-          className={`${menuItemBase} text-rose-600 hover:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20`}
+          className={`${menuItemBase} text-red-600 dark:text-red-400 hover:bg-red-500/10`}
         >
-          <LogOutIcon size={18} />
-          <span>Sair da conta</span>
+          <LogOutIcon size={18} strokeWidth={1.75} />
+          Logout
         </button>
       </div>
     </div>
@@ -80,37 +91,45 @@ function GuestMenu() {
   const { openAuthModal } = useAuth();
 
   return (
-    <div className="flex w-60 flex-col items-center gap-4 p-3 text-center">
-      <div className="flex flex-col items-center gap-2 pt-2">
-        <div className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white shadow-md">
-          <Sparkles size={22} />
+    <div className="flex w-[calc(100vw-2.5rem)] max-w-60 sm:w-60 flex-col items-center gap-4 p-4 text-center">
+      <div className="flex flex-col items-center gap-2.5">
+        <div
+          className="flex h-14 w-14 items-center justify-center rounded-full shadow-sm"
+          style={{
+            background: "var(--color-paper-sunken)",
+            border: "1.5px solid var(--color-border)",
+            color: "var(--color-ink-faint)",
+          }}
+        >
+          <UserRoundIcon size={24} strokeWidth={1.5} />
         </div>
         <div>
           <h3
-            className="text-base font-bold text-slate-800 dark:text-slate-100"
-            style={{ fontFamily: "var(--font-display)" }}
+            className="text-lg font-semibold"
+            style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
           >
-            Sua conta Okbo
+            Not logged in
           </h3>
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-            Faça login para salvar seus livros e acompanhar suas metas.
+          <p className="text-sm mt-0.5" style={{ color: "var(--color-ink-muted)" }}>
+            Sign in to save your books.
           </p>
         </div>
       </div>
 
-      <div className="flex w-full flex-col gap-2 pt-1">
+      <div className="flex w-full flex-col gap-2.5">
         <button
           onClick={openAuthModal}
-          className="w-full rounded-2xl py-2.5 text-sm font-bold text-white shadow-md shadow-violet-500/25 transition-transform hover:scale-105 active:scale-95"
-          style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%)" }}
+          className="w-full rounded-full py-2.5 sm:py-3 text-base font-medium text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+          style={{ background: "var(--color-accent)" }}
         >
-          Entrar
+          Login
         </button>
         <button
           onClick={openAuthModal}
-          className="glass-pill w-full rounded-2xl py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200"
+          className="w-full rounded-full py-2.5 sm:py-3 text-base font-medium transition-all duration-150 hover:bg-black/5 dark:hover:bg-white/6"
+          style={{ color: "var(--color-ink-muted)" }}
         >
-          Criar conta
+          Sign Up
         </button>
       </div>
     </div>
@@ -123,7 +142,10 @@ export function ProfileModal() {
   const { profile } = useProfile();
 
   return (
-    <div className="glass-elevated absolute top-13 right-0 z-50 mt-1 flex flex-col items-center rounded-3xl p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+    <div
+      className="glass-elevated absolute top-10 sm:top-12 right-0 z-40 mt-1 flex flex-col items-center rounded-2xl shadow-2xl max-w-[calc(100vw-1.5rem)]"
+      style={{ minWidth: "fit-content" }}
+    >
       {session ? (
         <UserMenu
           email={session.user?.email}
