@@ -12,44 +12,60 @@ export function Header() {
   const isHome = location.pathname === "/";
   const showSearch = !isHome;
   const [showProfile, setShowProfile] = useState<boolean>(false);
-  const profileContainerRef = useRef <HTMLDivElement>(null)
-  useOnClickOutside (profileContainerRef,()=>{setShowProfile(false)})
+  const profileContainerRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(profileContainerRef, () => { setShowProfile(false); });
 
+  const iconBtnClass =
+    "flex size-9 shrink-0 items-center justify-center rounded-full transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/8 active:scale-95";
 
   return (
     <header className="header-fade fixed inset-x-0 top-0 z-50 h-30">
       <div className="mx-auto flex h-full w-full max-w-300 items-start justify-between px-6 py-6">
+
+        {/* Logo — only when not on home */}
         {!isHome && (
           <Link
             to="/"
-            className="font-display mt-1.5 mr-auto shrink-0 text-3xl font-bold"
+            className="mt-1 mr-auto shrink-0 text-3xl font-semibold tracking-tight transition-opacity hover:opacity-70"
+            style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
           >
-            okbo<span className="text-violet-500">.</span>
+            okbo<span style={{ color: "var(--color-accent)" }}>.</span>
           </Link>
         )}
 
+        {/* Search bar — compact, centered */}
         {showSearch && (
           <div className="mx-auto flex max-w-125 flex-1 justify-center">
             <SearchBar variant="compact" />
           </div>
         )}
 
-        <button
-          onClick={toggleTheme}
-          aria-label="Toggle theme"
-          className="ml-auto size-8 shrink-0 rounded-full p-1.5 text-slate-500 transition-all hover:text-violet-500 dark:text-slate-400"
-        >
-          {theme === "dark" ? <SunIcon /> : <MoonIcon />}
-        </button>
-        <div ref={profileContainerRef} className="relative flex items-center">
+        {/* Actions */}
+        <div className="ml-auto flex items-center gap-1">
           <button
-            onClick={() => setShowProfile(!showProfile)}
-            aria-label="Profile"
-            className="ml-1 size-8 shrink-0 rounded-full p-1.5 text-slate-500 transition-all hover:text-violet-500 dark:text-slate-400"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            className={iconBtnClass}
+            style={{ color: "var(--color-ink-muted)" }}
           >
-            <UserRoundIcon />
+            {theme === "dark" ? (
+              <SunIcon className="size-4.5" />
+            ) : (
+              <MoonIcon className="size-4.5" />
+            )}
           </button>
-          {showProfile && <ProfileModal />}
+
+          <div ref={profileContainerRef} className="relative flex items-center">
+            <button
+              onClick={() => setShowProfile(!showProfile)}
+              aria-label="Profile"
+              className={iconBtnClass}
+              style={{ color: "var(--color-ink-muted)" }}
+            >
+              <UserRoundIcon className="size-4.5" />
+            </button>
+            {showProfile && <ProfileModal />}
+          </div>
         </div>
       </div>
     </header>

@@ -3,14 +3,12 @@ import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 
 interface AuthModalProps {
-  ref?: Ref<HTMLDivElement>
+  ref?: Ref<HTMLDivElement>;
 }
 
 export function AuthModal({ ref }: AuthModalProps) {
   const { closeAuthModal } = useAuth();
-  const [view, setView] = useState<"login" | "register1" | "register2">(
-    "login",
-  );
+  const [view, setView] = useState<"login" | "register1" | "register2">("login");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,16 +18,8 @@ export function AuthModal({ ref }: AuthModalProps) {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password,
-    });
-
-    if (error) {
-      setErrorMsg(error.message);
-      return;
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) setErrorMsg(error.message);
   };
 
   const handleRegisterStep1 = async (e: React.FormEvent) => {
@@ -37,176 +27,204 @@ export function AuthModal({ ref }: AuthModalProps) {
     setErrorMsg("");
     setView("register2");
   };
+
   const handleRegisterStep2 = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-
     const { error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-      options: {
-        data: {
-          username: username,
-        },
-      },
+      email,
+      password,
+      options: { data: { username } },
     });
-
-    if (error) {
-      setErrorMsg(error.message);
-      return;
-    }
+    if (error) setErrorMsg(error.message);
   };
 
-  // Classes extraídas para manter a consistência e evitar repetição visual
-  const inputClassName =
-    "w-full bg-transparent border-b-2 border-slate-400/50 text-slate-900 placeholder-slate-400 transition focus:border-violet-500 focus:outline-none dark:border-slate-600 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-violet-400";
-  const primaryButtonClassName =
-    "mx-auto w-full mt-4 max-w-28 rounded-full bg-violet-500 px-6 py-2 text-sm text-white transition-colors hover:bg-violet-600 dark:bg-violet-600 dark:hover:bg-violet-500";
-  const cancelButtonClassName =
-    "mx-auto w-full max-w-28 px-1 py-1 text-xs text-slate-500 transition-colors hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400";
+  const inputClass =
+    "w-full border-0 border-b py-2.5 text-sm bg-transparent outline-none transition-colors placeholder:text-[var(--color-ink-faint)] focus:border-[var(--color-accent)]";
+  const inputStyle = {
+    borderColor: "var(--color-border-mid)",
+    color: "var(--color-ink)",
+    fontFamily: "var(--font-sans)",
+  };
 
   return (
-    <div ref={ref} className="glass flex w-full max-w-80 flex-col rounded-3xl p-6 dark:bg-slate-900/40">
-      <div className="flex w-full flex-row justify-around gap-3">
-        <button
-          className={
-            view === "login"
-              ? "font-medium text-violet-600 dark:text-violet-400"
-              : "text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-          }
-          onClick={() => setView("login")}
-        >
-          Login
-        </button>
-        <button
-          className={
-            view !== "login"
-              ? "font-medium text-violet-600 dark:text-violet-400"
-              : "text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-          }
-          onClick={() => setView("register1")}
-        >
-          Register
-        </button>
+    <div
+      ref={ref}
+      className="glass-elevated flex w-full max-w-80 flex-col gap-6 rounded-3xl p-7"
+    >
+      {/* Tabs */}
+      <div
+        className="flex gap-1 rounded-full p-1"
+        style={{ background: "var(--color-paper-sunken)" }}
+      >
+        {(["login", "register1"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setView(tab)}
+            className="flex-1 rounded-full py-1.5 text-sm font-medium transition-all duration-150"
+            style={{
+              background: view === tab || (tab === "register1" && view === "register2")
+                ? "var(--color-paper-raised)"
+                : "transparent",
+              color: view === tab || (tab === "register1" && view === "register2")
+                ? "var(--color-ink)"
+                : "var(--color-ink-muted)",
+              boxShadow: view === tab || (tab === "register1" && view === "register2")
+                ? "var(--shadow-editorial)"
+                : "none",
+            }}
+          >
+            {tab === "login" ? "Login" : "Register"}
+          </button>
+        ))}
       </div>
 
-      <div className="mt-10 flex flex-col">
-        {errorMsg && (
-          <div className="mb-4 rounded bg-red-500/20 p-2 text-center text-xs text-red-500">
-            {errorMsg}
-          </div>
-        )}
+      {/* Error */}
+      {errorMsg && (
+        <div
+          className="rounded-xl px-4 py-2.5 text-center text-xs"
+          style={{
+            background: "rgba(220, 38, 38, 0.08)",
+            color: "#DC2626",
+          }}
+        >
+          {errorMsg}
+        </div>
+      )}
+
+      {/* Forms */}
+      <div>
         {view === "login" && (
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
-            <div className="flex flex-col">
-              <label className="sr-only" htmlFor="login-email">
-                Email
-              </label>
+          <form onSubmit={handleLogin} className="flex flex-col gap-5">
+            <div>
+              <label className="sr-only" htmlFor="login-email">Email</label>
               <input
-                className={inputClassName}
+                className={inputClass}
+                style={inputStyle}
                 id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="email"
+                placeholder="Email"
                 required
               />
             </div>
-            <div className="flex flex-col">
-              <label className="sr-only" htmlFor="login-password">
-                Password
-              </label>
+            <div>
+              <label className="sr-only" htmlFor="login-password">Password</label>
               <input
-                className={inputClassName}
+                className={inputClass}
+                style={inputStyle}
                 id="login-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="password"
+                placeholder="Password"
                 required
               />
             </div>
-            <button type="submit" className={primaryButtonClassName}>
-              Login
-            </button>
-            <button
-              type="button"
-              onClick={closeAuthModal}
-              className={cancelButtonClassName}
-            >
-              Cancel
-            </button>
+            <div className="flex flex-col gap-2 pt-2">
+              <button
+                type="submit"
+                className="w-full rounded-full py-2.5 text-sm font-medium text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+                style={{ background: "var(--color-accent)" }}
+              >
+                Login
+              </button>
+              <button
+                type="button"
+                onClick={closeAuthModal}
+                className="w-full rounded-full py-2 text-xs transition-all duration-150 hover:opacity-70"
+                style={{ color: "var(--color-ink-faint)" }}
+              >
+                Cancel
+              </button>
+            </div>
           </form>
         )}
+
         {view === "register1" && (
-          <form onSubmit={handleRegisterStep1} className="flex flex-col gap-4">
-            <div className="flex flex-col">
-              <label className="sr-only" htmlFor="register-email">
-                Email
-              </label>
+          <form onSubmit={handleRegisterStep1} className="flex flex-col gap-5">
+            <div>
+              <label className="sr-only" htmlFor="register-email">Email</label>
               <input
-                className={inputClassName}
+                className={inputClass}
+                style={inputStyle}
                 id="register-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="email"
+                placeholder="Email"
                 required
               />
             </div>
-            <div className="flex flex-col">
-              <label className="sr-only" htmlFor="register-password">
-                Password
-              </label>
+            <div>
+              <label className="sr-only" htmlFor="register-password">Password</label>
               <input
-                className={inputClassName}
+                className={inputClass}
+                style={inputStyle}
                 id="register-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="password"
+                placeholder="Password"
                 required
               />
             </div>
-            <button type="submit" className={primaryButtonClassName}>
-              Next
-            </button>
-            <button
-              type="button"
-              onClick={closeAuthModal}
-              className={cancelButtonClassName}
-            >
-              Cancel
-            </button>
+            <div className="flex flex-col gap-2 pt-2">
+              <button
+                type="submit"
+                className="w-full rounded-full py-2.5 text-sm font-medium text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+                style={{ background: "var(--color-accent)" }}
+              >
+                Next →
+              </button>
+              <button
+                type="button"
+                onClick={closeAuthModal}
+                className="w-full rounded-full py-2 text-xs transition-all duration-150 hover:opacity-70"
+                style={{ color: "var(--color-ink-faint)" }}
+              >
+                Cancel
+              </button>
+            </div>
           </form>
         )}
+
         {view === "register2" && (
-          <form onSubmit={handleRegisterStep2} className="flex flex-col gap-4">
-            <div className="flex flex-col">
-              <label className="sr-only" htmlFor="register-username">
-                Username
-              </label>
+          <form onSubmit={handleRegisterStep2} className="flex flex-col gap-5">
+            <p className="text-xs" style={{ color: "var(--color-ink-muted)" }}>
+              Choose a username to complete your account.
+            </p>
+            <div>
+              <label className="sr-only" htmlFor="register-username">Username</label>
               <input
-                className={inputClassName}
+                className={inputClass}
+                style={inputStyle}
                 id="register-username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="username"
+                placeholder="Username"
                 required
               />
             </div>
-
-            <button type="submit" className={primaryButtonClassName}>
-              Register
-            </button>
-            <button
-              type="button"
-              onClick={closeAuthModal}
-              className={cancelButtonClassName}
-            >
-              Cancel
-            </button>
+            <div className="flex flex-col gap-2 pt-2">
+              <button
+                type="submit"
+                className="w-full rounded-full py-2.5 text-sm font-medium text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98]"
+                style={{ background: "var(--color-accent)" }}
+              >
+                Create account
+              </button>
+              <button
+                type="button"
+                onClick={closeAuthModal}
+                className="w-full rounded-full py-2 text-xs transition-all duration-150 hover:opacity-70"
+                style={{ color: "var(--color-ink-faint)" }}
+              >
+                Cancel
+              </button>
+            </div>
           </form>
         )}
       </div>

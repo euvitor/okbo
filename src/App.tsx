@@ -12,13 +12,14 @@ import { MyShelf } from "./pages/MyShelf";
 
 function App() {
   const { isAuthModalOpen, closeAuthModal } = useAuth();
-  const modalRef = useRef<HTMLDivElement>(null)
-  useOnClickOutside(modalRef, closeAuthModal)
+  const modalRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(modalRef, closeAuthModal);
 
   return (
     <BrowserRouter>
-      <div className="app-bg flex min-h-screen flex-col text-neutral-900 dark:text-neutral-50">
-        <div className="mx-auto flex w-full max-w-300 flex-1 flex-col px-3 pt-32">
+      <div className="app-bg flex min-h-screen flex-col" style={{ color: "var(--color-ink)" }}>
+        {/* Noise texture sits behind everything via ::before on app-bg */}
+        <div className="relative z-0 mx-auto flex w-full max-w-300 flex-1 flex-col px-3 pt-32">
           <Header />
           <main className="flex flex-1 flex-col">
             <Routes>
@@ -26,17 +27,21 @@ function App() {
               <Route path="/book/:id" element={<BookDetails />} />
               <Route path="/search" element={<SearchResults />} />
               <Route path="/myshelf" element={<MyShelf />} />
-              {/* 404 Fallback Route  */}
+              {/* 404 Fallback */}
               <Route
                 path="*"
                 element={
                   <div className="p-8 text-center">
-                    <h2 className="text-2xl font-bold">
+                    <h2
+                      className="text-2xl font-bold"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
                       Página não encontrada
                     </h2>
                     <Link
                       to="/"
-                      className="mt-4 inline-block text-violet-500 hover:underline"
+                      className="mt-4 inline-block transition-colors hover:text-violet-600"
+                      style={{ color: "var(--color-accent)" }}
                     >
                       Voltar ao início
                     </Link>
@@ -45,22 +50,31 @@ function App() {
               />
             </Routes>
           </main>
-          <footer className="py-4 text-center text-sm text-slate-400">
-            {"made with <📚💜/> by "}
+
+          <footer
+            className="py-6 text-center text-xs"
+            style={{ color: "var(--color-ink-faint)" }}
+          >
+            {"made with "}
+            <span style={{ color: "var(--color-accent)" }}>{"<📚/>"}</span>
+            {" by "}
             <a
               href="https://github.com/euvitor"
-              className="transition-colors hover:text-violet-500"
+              className="transition-colors hover:opacity-70"
+              style={{ color: "var(--color-ink-muted)" }}
             >
               euvitor
             </a>
           </footer>
-
-          {isAuthModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-slate-950/70 backdrop-blur-sm">
-              <AuthModal ref={modalRef} />
-            </div>
-          )}
         </div>
+
+        {isAuthModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
+            style={{ background: "rgba(44, 40, 37, 0.25)" }}
+          >
+            <AuthModal ref={modalRef} />
+          </div>
+        )}
       </div>
     </BrowserRouter>
   );

@@ -10,14 +10,20 @@ export function StarRating({ rating, count }: StarRatingProps) {
       {[1, 2, 3, 4, 5].map((i) => (
         <span
           key={i}
-          className={`text-xs ${i <= Math.round(rating) ? "text-amber-400" : "text-neutral-300 dark:text-neutral-600"}`}
+          className="text-xs leading-none"
+          style={{
+            color:
+              i <= Math.round(rating)
+                ? "#D97706" /* amber-600, readable on both bg */
+                : "var(--color-ink-faint)",
+          }}
         >
           ★
         </span>
       ))}
       {count && (
-        <span className="text-xs text-neutral-400 dark:text-neutral-500">
-          ({count})
+        <span className="text-xs" style={{ color: "var(--color-ink-faint)" }}>
+          ({count.toLocaleString()})
         </span>
       )}
     </div>

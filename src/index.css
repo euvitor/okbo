@@ -1,11 +1,22 @@
 @import "tailwindcss";
 @variant dark (&:where(.dark, .dark *));
 
+/* ============================================================
+   FONTS
+   ============================================================ */
 @font-face {
   font-family: 'Erode';
   src: url('/fonts/Erode-Variable.woff2') format('woff2');
   font-weight: 300 700;
   font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Erode';
+  src: url('/fonts/Erode-VariableItalic.woff2') format('woff2');
+  font-weight: 300 700;
+  font-style: italic;
   font-display: swap;
 }
 
@@ -17,28 +28,140 @@
   font-display: swap;
 }
 
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
 @theme {
-  --font-sans: 'Plus Jakarta Sans', sans-serif;
-  --font-display: 'Erode', serif;
+  /* Fonts */
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Erode', ui-serif, Georgia, serif;
+
+  /* Light palette — paper & ink */
+  --color-paper:        #F7F4EF;
+  --color-paper-raised: #FAF8F4;
+  --color-paper-sunken: #EDE9E1;
+  --color-ink:          #2C2825;
+  --color-ink-muted:    #6B6560;
+  --color-ink-faint:    #B5B0AA;
+  --color-border:       rgba(44, 40, 37, 0.09);
+  --color-border-mid:   rgba(44, 40, 37, 0.15);
+
+  /* Dark palette — warm dark */
+  --color-paper-dark:        #1C1917;
+  --color-paper-raised-dark: #232019;
+  --color-paper-sunken-dark: #141210;
+  --color-ink-dark:          #EDE8E3;
+  --color-ink-muted-dark:    #9A948E;
+  --color-ink-faint-dark:    #524E49;
+  --color-border-dark:       rgba(237, 232, 227, 0.08);
+  --color-border-mid-dark:   rgba(237, 232, 227, 0.14);
+
+  /* Accent — violet, used sparingly */
+  --color-accent:       #6D28D9;
+  --color-accent-light: #7C3AED;
+  --color-accent-soft:  rgba(109, 40, 217, 0.08);
+
+  /* Shadows */
+  --shadow-editorial:    0 1px 3px rgba(44, 40, 37, 0.06), 0 4px 16px rgba(44, 40, 37, 0.08);
+  --shadow-editorial-md: 0 2px 8px rgba(44, 40, 37, 0.08), 0 8px 32px rgba(44, 40, 37, 0.1);
+  --shadow-editorial-lg: 0 4px 16px rgba(44, 40, 37, 0.1), 0 16px 48px rgba(44, 40, 37, 0.12);
 }
 
-@layer components {
-  .glass {
-    background: rgba(255, 255, 255, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 12px 48px rgba(99, 102, 241, 0.18);
+/* ============================================================
+   BASE LAYER
+   ============================================================ */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
   }
 
-  .dark .glass {
-    background: rgba(30, 30, 30, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 48px rgba(99, 102, 241, 0.14);
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background-color: var(--color-paper);
+  }
+
+  .dark body {
+    color: var(--color-ink-dark);
+    background-color: var(--color-paper-dark);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  /* Scrollbar — ultra subtle */
+  ::-webkit-scrollbar        { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  { background: var(--color-ink-faint); border-radius: 99px; }
+  .dark ::-webkit-scrollbar-thumb { background: var(--color-ink-faint-dark); }
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+
+/* Glass — frosted paper effect */
+@utility glass {
+  background: rgba(247, 244, 239, 0.75);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, var(--shadow-editorial);
+
+  @variant dark {
+    background: rgba(28, 25, 23, 0.72);
+    border: 1px solid var(--color-border-dark);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 1px 3px rgba(0,0,0,0.2), 0 4px 16px rgba(0,0,0,0.25);
   }
 }
 
-/* Mantemos como @utility pois são únicos e não conflitam */
+/* Glass elevated — for modals and dropdowns */
+@utility glass-elevated {
+  background: rgba(250, 248, 244, 0.92);
+  border: 1px solid var(--color-border-mid);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, var(--shadow-editorial-lg);
+
+  @variant dark {
+    background: rgba(32, 28, 25, 0.94);
+    border: 1px solid var(--color-border-mid-dark);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 4px 16px rgba(0,0,0,0.3), 0 16px 48px rgba(0,0,0,0.4);
+  }
+}
+
+/* App background — paper with noise texture */
+@utility app-bg {
+  background-color: var(--color-paper);
+  position: relative;
+
+  @variant dark {
+    background-color: var(--color-paper-dark);
+  }
+
+  &::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.032;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 200px 200px;
+  }
+}
+
+/* Header — fades into the page */
 @utility header-fade {
   position: relative;
   background: none !important;
@@ -52,37 +175,41 @@
     z-index: -1;
     background: linear-gradient(
       to bottom,
-      oklch(97.1% 0.003 264.54 / 90%) 0%,
-      oklch(97.1% 0.003 264.54 / 60%) 60%,
+      color-mix(in oklch, var(--color-paper) 92%, transparent) 0%,
+      color-mix(in oklch, var(--color-paper) 60%, transparent) 60%,
       transparent 100%
     );
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
   }
 
   @variant dark {
     &::before {
       background: linear-gradient(
         to bottom,
-        oklch(14.5% 0.003 264.54 / 90%) 0%,
-        oklch(14.5% 0.003 264.54 / 60%) 60%,
+        color-mix(in oklch, var(--color-paper-dark) 92%, transparent) 0%,
+        color-mix(in oklch, var(--color-paper-dark) 60%, transparent) 60%,
         transparent 100%
       );
     }
   }
 }
 
-@utility app-bg {
-  background-color: oklch(97.1% 0.003 264.54);
-  background-image: url('/images/light-bg.svg');
-  background-size: cover;
-  background-position: center top;
-  background-attachment: fixed;
+/* Text colors — semantic */
+@utility text-ink          { color: var(--color-ink); }
+@utility text-ink-muted    { color: var(--color-ink-muted); }
+@utility text-ink-faint    { color: var(--color-ink-faint); }
+@utility bg-paper          { background-color: var(--color-paper); }
+@utility bg-paper-raised   { background-color: var(--color-paper-raised); }
+@utility bg-paper-sunken   { background-color: var(--color-paper-sunken); }
+@utility border-editorial  { border-color: var(--color-border); }
 
-  @variant dark {
-    background-color: oklch(14.5% 0.003 264.54);
-    background-image: url('/images/dark-bg.svg');
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

@@ -269,34 +269,36 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
         }
     };
 
+    const menuItemBase =
+        "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 hover:bg-black/5 dark:hover:bg-white/6 active:scale-[0.98]";
+
     return (
         <div className="relative">
             {/* --- 1. MAIN TRIGGER BUTTON --- */}
             <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 disabled={isLoading}
-                className="rounded-full p-2.5 text-slate-500 transition-colors hover:text-green-500 dark:text-slate-400 dark:hover:text-green-400"
+                className="flex size-9 items-center justify-center rounded-full transition-all duration-150 hover:bg-black/5 dark:hover:bg-white/8 active:scale-95 disabled:opacity-50"
+                style={{ color: "var(--color-ink-muted)" }}
             >
                 {isLoading ? (
-                    <Loader2 size={20} className="animate-spin" />
+                    <Loader2 size={17} className="animate-spin" />
                 ) : currentStatus ? (
-                    <Pencil size={20} />
+                    <Pencil size={17} />
                 ) : (
-                    <Plus size={24} />
+                    <Plus size={20} />
                 )}
             </button>
 
             {/* --- 2. DROPDOWN MENU --- */}
             {isMenuOpen && (
                 <>
-                    {/* Invisible backdrop to catch outside clicks and close the menu */}
                     <div
                         className="fixed inset-0 z-40"
                         onClick={() => setIsMenuOpen(false)}
-                    ></div>
+                    />
 
-                    <div className="absolute right-0 top-14 z-50 flex w-56 flex-col overflow-hidden rounded-2xl glass border border-white/20 bg-white/90 p-1 shadow-xl dark:border-white/10 dark:bg-neutral-900/90">
-                        {/* Reading Status Options */}
+                    <div className="glass-elevated absolute right-0 top-11 z-50 flex w-52 flex-col overflow-hidden rounded-2xl p-1.5">
                         {[
                             { id: "want_to_read", label: "Want to Read" },
                             { id: "reading", label: "Reading" },
@@ -306,22 +308,33 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
                             <button
                                 key={option.id}
                                 onClick={() => handleSelectStatus(option.id)}
-                                className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-violet-500/10 hover:text-violet-700 dark:text-slate-300 dark:hover:text-violet-400"
+                                className={menuItemBase}
+                                style={{
+                                    color: currentStatus === option.id
+                                        ? "var(--color-accent)"
+                                        : "var(--color-ink-muted)",
+                                    fontWeight: currentStatus === option.id ? 600 : 500,
+                                }}
                             >
                                 {option.label}
-                                {currentStatus === option.id && <Check size={16} />}
+                                {currentStatus === option.id && (
+                                    <Check size={14} style={{ color: "var(--color-accent)" }} />
+                                )}
                             </button>
                         ))}
 
-                        {/* Destructive Action (Only visible if the book is saved) */}
                         {currentStatus && (
                             <>
-                                <div className="my-1 h-px bg-slate-200 dark:bg-white/10"></div>
+                                <div
+                                    className="my-1.5 h-px"
+                                    style={{ background: "var(--color-border)" }}
+                                />
                                 <button
                                     onClick={handleRemoveFromShelf}
-                                    className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 transition-colors hover:bg-red-500/10 dark:text-red-400"
+                                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 hover:bg-red-50 dark:hover:bg-red-950/30 active:scale-[0.98]"
+                                    style={{ color: "#DC2626" }}
                                 >
-                                    <Trash2 size={16} />
+                                    <Trash2 size={14} />
                                     Remove from Shelf
                                 </button>
                             </>
@@ -330,46 +343,64 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
                 </>
             )}
 
-            {/* --- 3. REVIEW MODAL (Triggers when status becomes "Read") --- */}
+            {/* --- 3. REVIEW MODAL --- */}
             {isReviewModalOpen && (
-                <div className="fixed inset-0 z-60 flex items-center justify-center bg-white/20 backdrop-blur-sm dark:bg-black/40">
-                    <div className="w-full max-w-md rounded-3xl glass bg-white/95 p-6 shadow-2xl dark:bg-neutral-900/95 flex flex-col gap-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="font-display text-xl font-bold text-slate-800 dark:text-slate-100">
-                                You finished it! 🎉
-                            </h3>
+                <div
+                    className="fixed inset-0 z-60 flex items-center justify-center backdrop-blur-sm"
+                    style={{ background: "rgba(44, 40, 37, 0.25)" }}
+                >
+                    <div className="glass-elevated mx-4 flex w-full max-w-md flex-col gap-5 rounded-3xl p-7">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <h3
+                                    className="text-xl font-semibold"
+                                    style={{
+                                        fontFamily: "var(--font-display)",
+                                        color: "var(--color-ink)",
+                                    }}
+                                >
+                                    You finished it! 🎉
+                                </h3>
+                                <p className="mt-1 text-sm" style={{ color: "var(--color-ink-muted)" }}>
+                                    Add a quick review? (Optional)
+                                </p>
+                            </div>
                             <button
                                 onClick={() => handleSaveReview(false)}
-                                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                                className="flex size-8 items-center justify-center rounded-full transition-all hover:bg-black/5 dark:hover:bg-white/8"
+                                style={{ color: "var(--color-ink-faint)" }}
                             >
-                                <X size={20} />
+                                <X size={16} />
                             </button>
                         </div>
-
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Would you like to write a quick review? (Optional)
-                        </p>
 
                         <textarea
                             value={reviewText}
                             onChange={(e) => setReviewText(e.target.value)}
-                            className="h-32 w-full resize-none rounded-2xl border-none bg-slate-100 p-4 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-violet-500 dark:bg-slate-800 dark:text-slate-200"
+                            className="h-32 w-full resize-none rounded-2xl border-0 p-4 text-sm leading-relaxed outline-none transition-shadow focus:ring-2 focus:ring-[var(--color-accent)]/30"
+                            style={{
+                                background: "var(--color-paper-sunken)",
+                                color: "var(--color-ink)",
+                                fontFamily: "var(--font-sans)",
+                            }}
                             placeholder="What did you think of this book?"
-                        ></textarea>
+                        />
 
-                        <div className="flex gap-2 mt-2">
+                        <div className="flex gap-2">
                             <button
                                 onClick={() => handleSaveReview(false)}
-                                className="flex-1 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
+                                className="flex-1 rounded-full py-2.5 text-sm font-medium transition-all duration-150 hover:bg-black/5 dark:hover:bg-white/8 active:scale-[0.98]"
+                                style={{ color: "var(--color-ink-muted)" }}
                             >
                                 Skip
                             </button>
                             <button
                                 onClick={() => handleSaveReview(true)}
                                 disabled={isLoading}
-                                className="flex-1 rounded-full bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700 transition-colors flex items-center justify-center"
+                                className="flex flex-1 items-center justify-center rounded-full py-2.5 text-sm font-medium text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
+                                style={{ background: "var(--color-accent)" }}
                             >
-                                {isLoading ? <Loader2 size={16} className="animate-spin" /> : "Save"}
+                                {isLoading ? <Loader2 size={16} className="animate-spin" /> : "Save review"}
                             </button>
                         </div>
                     </div>
