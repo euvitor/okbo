@@ -16,42 +16,42 @@ export function Header() {
   useOnClickOutside(profileContainerRef, () => { setShowProfile(false); });
 
   const iconBtnClass =
-    "flex size-9 shrink-0 items-center justify-center rounded-full transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/8 active:scale-95";
+    "glass-pill flex size-10.5 shrink-0 items-center justify-center rounded-full transition-all duration-300 hover:scale-105 active:scale-95";
 
   return (
-    <header className="header-fade fixed inset-x-0 top-0 z-50 h-30">
-      <div className="mx-auto flex h-full w-full max-w-300 items-start justify-between px-6 py-6">
+    <header className="header-fade fixed inset-x-0 top-0 z-50 h-32">
+      <div className="mx-auto flex h-full w-full max-w-300 items-start justify-between px-6 py-6 sm:px-8">
 
         {/* Logo — only when not on home */}
         {!isHome && (
           <Link
             to="/"
-            className="mt-1 mr-auto shrink-0 text-3xl font-semibold tracking-tight transition-opacity hover:opacity-70"
+            className="group mt-1 mr-auto shrink-0 text-3xl font-bold tracking-tight transition-transform duration-300 hover:scale-105 sm:text-4xl"
             style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
           >
-            okbo<span style={{ color: "var(--color-accent)" }}>.</span>
+            okbo<span className="inline-block text-violet-500 drop-shadow-[0_2px_8px_rgba(124,58,237,0.4)] transition-transform duration-300 group-hover:scale-125">.</span>
           </Link>
         )}
 
         {/* Search bar — compact, centered */}
         {showSearch && (
-          <div className="mx-auto flex max-w-125 flex-1 justify-center">
+          <div className="mx-auto flex max-w-135 flex-1 justify-center px-4">
             <SearchBar variant="compact" />
           </div>
         )}
 
-        {/* Actions */}
-        <div className="ml-auto flex items-center gap-1">
+        {/* Action Buttons */}
+        <div className="ml-auto flex items-center gap-2.5">
           <button
             onClick={toggleTheme}
             aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             className={iconBtnClass}
-            style={{ color: "var(--color-ink-muted)" }}
+            style={{ color: "var(--color-ink)" }}
           >
             {theme === "dark" ? (
-              <SunIcon className="size-4.5" />
+              <SunIcon className="size-5 text-amber-400 transition-transform duration-300 hover:rotate-45" />
             ) : (
-              <MoonIcon className="size-4.5" />
+              <MoonIcon className="size-5 text-violet-600 transition-transform duration-300 hover:-rotate-12" />
             )}
           </button>
 
@@ -60,9 +60,9 @@ export function Header() {
               onClick={() => setShowProfile(!showProfile)}
               aria-label="Profile"
               className={iconBtnClass}
-              style={{ color: "var(--color-ink-muted)" }}
+              style={{ color: "var(--color-ink)" }}
             >
-              <UserRoundIcon className="size-4.5" />
+              <UserRoundIcon className="size-5 text-violet-600 dark:text-violet-400" />
             </button>
             {showProfile && <ProfileModal />}
           </div>

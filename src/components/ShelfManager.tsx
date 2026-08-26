@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Check, Trash2, Loader2, X } from "lucide-react";
+import { Plus, Check, Trash2, Loader2, X, BookmarkCheck } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 
 interface ShelfManagerProps {
@@ -19,16 +19,13 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [reviewText, setReviewText] = useState("");
 
-    // Standardized date format for database inserts
-    const today = new Date().toISOString().split('T')[0]
+    const today = new Date().toISOString().split('T')[0];
 
     useEffect(() => {
         async function checkShelfStatus() {
             if (!userId || !bookId) return;
             try {
                 setIsLoading(true);
-
-                // 1. Verify if the book already exists in our internal database
                 const { data: bookData, error: bookError } = await supabase
                     .from("books")
                     .select("id")
@@ -42,7 +39,6 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
                     return;
                 }
 
-                // 2. Verify if the user has already added this book to their shelf
                 const { data: userBookData, error: userBookError } = await supabase
                     .from("user_books")
                     .select("id, status")
@@ -52,7 +48,6 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
 
                 if (userBookError) throw userBookError;
 
-                // 3. Hydrate local state if a relationship exists
                 if (userBookData) {
                     setUserBookId(userBookData.id);
                     setCurrentStatus(userBookData.status);
@@ -70,27 +65,22 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
         checkShelfStatus();
     }, [bookId, userId]);
 
-    // --- HANDLERS ---
-
-    // Manages the complex relational insertion: Book -> User_Book -> Reading_Session
     const handleSelectStatus = async (newStatus: string) => {
-        if (!userId) return
+        if (!userId) return;
 
         try {
-            setIsLoading(true)
-
-            // Step 1: Ensure the book exists in our DB, otherwise create it
-            let internalBookId = null
+            setIsLoading(true);
+            let internalBookId = null;
             const { data: existingBook, error: checkError } = await supabase
                 .from('books')
                 .select('id')
                 .eq('google_api_id', bookId)
-                .maybeSingle()
+                .maybeSingle();
 
-            if (checkError) throw checkError
+            if (checkError) throw checkError;
 
             if (existingBook) {
-                internalBookId = existingBook.id
+                internalBookId = existingBook.id;
             } else {
                 const { data: newBook, error: insertError } = await supabase
                     .from('books')
@@ -100,14 +90,13 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
                         cover_url: bookCoverUrl
                     })
                     .select('id')
-                    .single()
+                    .single();
 
-                if (insertError) throw insertError
-                internalBookId = newBook.id
+                if (insertError) throw insertError;
+                internalBookId = newBook.id;
             }
 
-            // Step 2: Upsert the user_books relationship
-            let currentUserBookId = userBookId
+            let currentUserBookId = userBookId;
 
             if (!currentUserBookId) {
                 const { data: existingUserBook } = await supabase
@@ -115,16 +104,16 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
                     .select('id')
                     .eq('user_id', userId)
                     .eq('book_id', internalBookId)
-                    .maybeSingle()
+                    .maybeSingle();
 
                 if (existingUserBook) {
-                    currentUserBookId = existingUserBook.id
+                    currentUserBookId = existingUserBook.id;
                     const { error: updateError } = await supabase
                         .from('user_books')
                         .update({ status: newStatus })
-                        .eq('id', currentUserBookId)
+                        .eq('id', currentUserBookId);
 
-                    if (updateError) throw updateError
+                    if (updateError) throw updateError;
                 } else {
                     const { data: newUserBook, error: insertUserBookError } = await supabase
                         .from('user_books')
@@ -134,69 +123,62 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
                             status: newStatus
                         })
                         .select('id')
-                        .single()
+                        .single();
 
-                    if (insertUserBookError) throw insertUserBookError
-                    currentUserBookId = newUserBook.id
+                    if (insertUserBookError) throw insertUserBookError;
+                    currentUserBookId = newUserBook.id;
                 }
             } else {
                 const { error: updateError } = await supabase
                     .from('user_books')
                     .update({ status: newStatus })
-                    .eq('id', currentUserBookId)
+                    .eq('id', currentUserBookId);
 
-                if (updateError) throw updateError
+                if (updateError) throw updateError;
             }
 
-            // Step 3: Manage Reading Sessions based on the target status
             const { data: openSession } = await supabase
                 .from('reading_sessions')
                 .select('id')
                 .eq('user_book_id', currentUserBookId)
                 .is('end_date', null)
-                .maybeSingle()
+                .maybeSingle();
 
-            // If moving to "Want to Read" or "DNF", we abandon any incomplete active sessions
             if (newStatus === 'want_to_read' || newStatus === 'dropped') {
                 if (openSession) {
-                    await supabase.from('reading_sessions').delete().eq('id', openSession.id)
+                    await supabase.from('reading_sessions').delete().eq('id', openSession.id);
                 }
-            }
-            // If moving to "Reading", we start a new session (if one isn't already open)
-            else if (newStatus === 'reading') {
+            } else if (newStatus === 'reading') {
                 if (!openSession) {
                     await supabase.from('reading_sessions').insert({
                         user_book_id: currentUserBookId,
                         start_date: today
-                    })
+                    });
                 }
             }
 
-            // Update UI state
-            setUserBookId(currentUserBookId)
-            setCurrentStatus(newStatus)
-            setIsMenuOpen(false)
+            setUserBookId(currentUserBookId);
+            setCurrentStatus(newStatus);
+            setIsMenuOpen(false);
 
-            // Step 4: If finished, prompt for a review before triggering the refresh
             if (newStatus === 'read') {
-                setIsReviewModalOpen(true)
+                setIsReviewModalOpen(true);
             } else {
-                // If not reviewing, trigger the update to refresh the BookDetails timeline immediately
-                onUpdate?.()
+                onUpdate?.();
             }
 
         } catch (error) {
-            console.error('Error saving book: ', error)
-            alert('Could not save the book. Please try again.')
+            console.error('Error saving book: ', error);
+            alert('Não foi possível salvar o livro. Tente novamente.');
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
-    }
+    };
 
     const handleSaveReview = async (isSave: boolean) => {
-        if (!userBookId) return
+        if (!userBookId) return;
 
-        setIsLoading(true)
+        setIsLoading(true);
 
         try {
             const { data: openSession } = await supabase
@@ -204,7 +186,7 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
                 .select('id')
                 .eq('user_book_id', userBookId)
                 .is('end_date', null)
-                .maybeSingle()
+                .maybeSingle();
 
             if (openSession) {
                 const { error: updateError } = await supabase
@@ -213,28 +195,27 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
                         end_date: today,
                         review: isSave ? (reviewText || null) : null
                     })
-                    .eq('id', openSession.id)
+                    .eq('id', openSession.id);
 
-                if (updateError) throw updateError
+                if (updateError) throw updateError;
             } else {
-                // Edge case: User clicked "Read" directly without ever clicking "Reading" first
                 const { error: insertError } = await supabase
                     .from('reading_sessions')
                     .insert({
                         user_book_id: userBookId,
-                        start_date: today, // Fallback start_date to today
+                        start_date: today,
                         end_date: today,
                         review: isSave ? (reviewText || null) : null
-                    })
+                    });
 
-                if (insertError) throw insertError
+                if (insertError) throw insertError;
             }
 
-            setReviewText('')
-            onUpdate?.() // Refresh BookDetails timeline
+            setReviewText('');
+            onUpdate?.();
         } catch (error) {
             console.error('Error saving review: ', error);
-            alert('Could not save the book review.');
+            alert('Não foi possível salvar a avaliação.');
         } finally {
             setIsLoading(false);
             setIsReviewModalOpen(false);
@@ -242,35 +223,36 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
     };
 
     const handleRemoveFromShelf = async () => {
-        if (!userBookId) return
+        if (!userBookId) return;
 
-        setIsLoading(true)
+        setIsLoading(true);
 
         try {
-            // Due to ON DELETE CASCADE, removing the user_book will automatically 
-            // wipe all associated reading_sessions from the database.
             const { error: removeError } = await supabase
                 .from('user_books')
                 .delete()
-                .eq('id', userBookId)
+                .eq('id', userBookId);
 
-            if (removeError) throw removeError
+            if (removeError) throw removeError;
 
-            setCurrentStatus(null)
-            setUserBookId(null)
-            setIsMenuOpen(false)
-
-            onUpdate?.() // Refresh BookDetails timeline
+            setCurrentStatus(null);
+            setUserBookId(null);
+            setIsMenuOpen(false);
+            onUpdate?.();
         } catch (error) {
-            console.log('Error removing from shelf:, ', error)
-            alert('Could not remove from shelf.')
+            console.log('Error removing from shelf: ', error);
+            alert('Não foi possível remover da estante.');
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
         }
     };
 
-    const menuItemBase =
-        "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 hover:bg-black/5 dark:hover:bg-white/6 active:scale-[0.98]";
+    const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+        want_to_read: { label: "Quero Ler", color: "text-amber-600 bg-amber-500/10" },
+        reading: { label: "Lendo Agora", color: "text-violet-600 bg-violet-500/10" },
+        read: { label: "Lido", color: "text-emerald-600 bg-emerald-500/10" },
+        dropped: { label: "Abandonado", color: "text-rose-600 bg-rose-500/10" },
+    };
 
     return (
         <div className="relative">
@@ -278,15 +260,17 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
             <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 disabled={isLoading}
-                className="flex size-9 items-center justify-center rounded-full transition-all duration-150 hover:bg-black/5 dark:hover:bg-white/8 active:scale-95 disabled:opacity-50"
-                style={{ color: "var(--color-ink-muted)" }}
+                title={currentStatus ? `Estante: ${STATUS_CONFIG[currentStatus]?.label || currentStatus}` : "Adicionar à estante"}
+                className={`glass-pill flex size-11 items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-50 ${
+                    currentStatus ? "bg-violet-600/10 border-violet-500/30" : ""
+                }`}
             >
                 {isLoading ? (
-                    <Loader2 size={17} className="animate-spin" />
+                    <Loader2 className="size-5 animate-spin text-violet-600" />
                 ) : currentStatus ? (
-                    <Pencil size={17} />
+                    <BookmarkCheck className="size-5 text-emerald-600 dark:text-emerald-400" />
                 ) : (
-                    <Plus size={20} />
+                    <Plus className="size-5 text-violet-600 dark:text-violet-400" />
                 )}
             </button>
 
@@ -298,44 +282,44 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
                         onClick={() => setIsMenuOpen(false)}
                     />
 
-                    <div className="glass-elevated absolute right-0 top-11 z-50 flex w-52 flex-col overflow-hidden rounded-2xl p-1.5">
+                    <div className="glass-elevated absolute right-0 top-13 z-50 flex w-60 flex-col overflow-hidden rounded-3xl p-2 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+                        <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                            Status de Leitura
+                        </div>
+
                         {[
-                            { id: "want_to_read", label: "Want to Read" },
-                            { id: "reading", label: "Reading" },
-                            { id: "read", label: "Read" },
-                            { id: "dropped", label: "Did Not Finish" },
+                            { id: "want_to_read", label: "Quero Ler", iconColor: "text-amber-500" },
+                            { id: "reading", label: "Lendo Agora", iconColor: "text-violet-500" },
+                            { id: "read", label: "Lido", iconColor: "text-emerald-500" },
+                            { id: "dropped", label: "Abandonado", iconColor: "text-rose-500" },
                         ].map((option) => (
                             <button
                                 key={option.id}
                                 onClick={() => handleSelectStatus(option.id)}
-                                className={menuItemBase}
-                                style={{
-                                    color: currentStatus === option.id
-                                        ? "var(--color-accent)"
-                                        : "var(--color-ink-muted)",
-                                    fontWeight: currentStatus === option.id ? 600 : 500,
-                                }}
+                                className={`flex items-center justify-between rounded-2xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-200 hover:scale-[1.02] ${
+                                    currentStatus === option.id
+                                        ? "bg-violet-600 text-white shadow-md shadow-violet-500/20"
+                                        : "hover:bg-black/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200"
+                                }`}
                             >
-                                {option.label}
-                                {currentStatus === option.id && (
-                                    <Check size={14} style={{ color: "var(--color-accent)" }} />
+                                <span>{option.label}</span>
+                                {currentStatus === option.id ? (
+                                    <Check className="size-4.5 text-white" />
+                                ) : (
+                                    <span className={`size-2 rounded-full ${option.iconColor} bg-current opacity-60`} />
                                 )}
                             </button>
                         ))}
 
                         {currentStatus && (
                             <>
-                                <div
-                                    className="my-1.5 h-px"
-                                    style={{ background: "var(--color-border)" }}
-                                />
+                                <div className="my-1.5 h-px bg-slate-200/80 dark:bg-white/10" />
                                 <button
                                     onClick={handleRemoveFromShelf}
-                                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 hover:bg-red-50 dark:hover:bg-red-950/30 active:scale-[0.98]"
-                                    style={{ color: "#DC2626" }}
+                                    className="flex w-full items-center gap-2 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-500/10 dark:text-rose-400"
                                 >
-                                    <Trash2 size={14} />
-                                    Remove from Shelf
+                                    <Trash2 className="size-4" />
+                                    <span>Remover da estante</span>
                                 </button>
                             </>
                         )}
@@ -346,61 +330,60 @@ export function ShelfManager({ bookId, bookTitle, bookCoverUrl, userId, onUpdate
             {/* --- 3. REVIEW MODAL --- */}
             {isReviewModalOpen && (
                 <div
-                    className="fixed inset-0 z-60 flex items-center justify-center backdrop-blur-sm"
-                    style={{ background: "rgba(44, 40, 37, 0.25)" }}
+                    className="fixed inset-0 z-60 flex items-center justify-center p-4 backdrop-blur-md"
+                    style={{ background: "rgba(28, 25, 23, 0.45)" }}
                 >
-                    <div className="glass-elevated mx-4 flex w-full max-w-md flex-col gap-5 rounded-3xl p-7">
+                    <div className="glass-elevated flex w-full max-w-md flex-col gap-6 rounded-[32px] p-7 sm:p-8 shadow-2xl">
                         <div className="flex items-start justify-between">
-                            <div>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-3xl">🎉</span>
                                 <h3
-                                    className="text-xl font-semibold"
+                                    className="text-2xl font-bold"
                                     style={{
                                         fontFamily: "var(--font-display)",
                                         color: "var(--color-ink)",
                                     }}
                                 >
-                                    You finished it! 🎉
+                                    Parabéns pela leitura!
                                 </h3>
-                                <p className="mt-1 text-sm" style={{ color: "var(--color-ink-muted)" }}>
-                                    Add a quick review? (Optional)
+                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                                    Deseja registrar suas impressões ou nota sobre este livro?
                                 </p>
                             </div>
                             <button
                                 onClick={() => handleSaveReview(false)}
-                                className="flex size-8 items-center justify-center rounded-full transition-all hover:bg-black/5 dark:hover:bg-white/8"
-                                style={{ color: "var(--color-ink-faint)" }}
+                                className="glass-pill flex size-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-white"
                             >
-                                <X size={16} />
+                                <X className="size-4" />
                             </button>
                         </div>
 
                         <textarea
                             value={reviewText}
                             onChange={(e) => setReviewText(e.target.value)}
-                            className="h-32 w-full resize-none rounded-2xl border-0 p-4 text-sm leading-relaxed outline-none transition-shadow focus:ring-2 focus:ring-[var(--color-accent)]/30"
+                            className="h-36 w-full resize-none rounded-2xl border-0 p-4 text-sm font-medium leading-relaxed outline-none transition-shadow focus:ring-2 focus:ring-violet-500/40"
                             style={{
                                 background: "var(--color-paper-sunken)",
                                 color: "var(--color-ink)",
                                 fontFamily: "var(--font-sans)",
                             }}
-                            placeholder="What did you think of this book?"
+                            placeholder="O que você achou desta história? Pontos marcantes, reflexões..."
                         />
 
-                        <div className="flex gap-2">
+                        <div className="flex gap-3">
                             <button
                                 onClick={() => handleSaveReview(false)}
-                                className="flex-1 rounded-full py-2.5 text-sm font-medium transition-all duration-150 hover:bg-black/5 dark:hover:bg-white/8 active:scale-[0.98]"
-                                style={{ color: "var(--color-ink-muted)" }}
+                                className="glass-pill flex-1 rounded-full py-3 text-sm font-semibold text-slate-600 transition-transform hover:scale-105 active:scale-95 dark:text-slate-300"
                             >
-                                Skip
+                                Pular por enquanto
                             </button>
                             <button
                                 onClick={() => handleSaveReview(true)}
                                 disabled={isLoading}
-                                className="flex flex-1 items-center justify-center rounded-full py-2.5 text-sm font-medium text-white transition-all duration-150 hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
-                                style={{ background: "var(--color-accent)" }}
+                                className="flex flex-1 items-center justify-center gap-2 rounded-full py-3 text-sm font-bold text-white shadow-lg shadow-violet-500/25 transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
+                                style={{ background: "linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%)" }}
                             >
-                                {isLoading ? <Loader2 size={16} className="animate-spin" /> : "Save review"}
+                                {isLoading ? <Loader2 className="size-4 animate-spin" /> : "Salvar avaliação"}
                             </button>
                         </div>
                     </div>

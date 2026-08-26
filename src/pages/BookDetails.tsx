@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ShareIcon, ShoppingCartIcon } from "lucide-react";
+import { ShareIcon, ShoppingCartIcon, BookOpenIcon, CalendarIcon } from "lucide-react";
 import type { Book } from "../types/book";
 import { getBookById } from "../services/googleBooks";
 import { StarRating } from "../components/StarRating";
@@ -28,7 +28,7 @@ export function BookDetails() {
         setError(null);
       } catch (error) {
         console.error(error);
-        setError("Error fetching book details");
+        setError("Erro ao carregar detalhes do livro");
       } finally {
         setLoading(false);
       }
@@ -49,32 +49,41 @@ export function BookDetails() {
   /* ── States ── */
   if (loading) {
     return (
-      <div
-        className="p-8 text-center text-sm animate-pulse"
-        style={{ color: "var(--color-ink-muted)" }}
-      >
-        Loading…
+      <div className="mx-auto max-w-300 px-4 py-16 text-center">
+        <div className="glass mx-auto flex max-w-md flex-col items-center gap-4 rounded-3xl p-12">
+          <div className="size-10 rounded-full border-3 border-violet-500 border-t-transparent animate-spin" />
+          <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+            Abrindo as páginas do livro...
+          </p>
+        </div>
       </div>
     );
   }
   if (error) {
     return (
-      <div className="p-8 text-center text-sm" style={{ color: "var(--color-ink-muted)" }}>
-        {error}
+      <div className="mx-auto max-w-300 px-4 py-16 text-center">
+        <div className="glass mx-auto flex max-w-md flex-col items-center gap-4 rounded-3xl p-10">
+          <span className="text-4xl text-rose-500">⚠️</span>
+          <p className="text-base font-semibold text-rose-600 dark:text-rose-400">{error}</p>
+        </div>
       </div>
     );
   }
   if (!book) {
     return (
-      <div className="p-8 text-center text-sm" style={{ color: "var(--color-ink-muted)" }}>
-        Book not found.
+      <div className="mx-auto max-w-300 px-4 py-16 text-center">
+        <div className="glass mx-auto flex max-w-md flex-col items-center gap-4 rounded-3xl p-10">
+          <span className="text-4xl">📖</span>
+          <p className="text-base font-semibold" style={{ color: "var(--color-ink-muted)" }}>
+            Livro não encontrado.
+          </p>
+        </div>
       </div>
     );
   }
 
-  /* Shared icon button style */
   const iconBtnClass =
-    "flex size-9 items-center justify-center rounded-full transition-all duration-200 hover:bg-black/6 dark:hover:bg-white/8 active:scale-95";
+    "glass-pill flex size-11 items-center justify-center rounded-full transition-all duration-300 hover:scale-110 active:scale-95 text-slate-700 dark:text-slate-200";
 
   const handleShare = async () => {
     const shareData = {
@@ -86,34 +95,33 @@ export function BookDetails() {
       await navigator.share(shareData);
     } else {
       await navigator.clipboard.writeText(window.location.href);
-      alert("Link copied!");
+      alert("Link copiado para a área de transferência!");
     }
   };
 
   return (
-    <div className="mx-auto max-w-300 px-6 py-8">
-      <div className="flex flex-col items-start gap-8 md:flex-row">
+    <div className="mx-auto max-w-300 px-4 py-8 sm:px-6">
+      <div className="flex flex-col items-center gap-10 md:flex-row md:items-start">
 
-        {/* ── Cover ── */}
-        <div className="w-full shrink-0 md:w-56">
+        {/* ── Book Cover with Floating Aura ── */}
+        <div className="relative w-full max-w-65 shrink-0 sm:max-w-72">
+          <div className="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-violet-600/30 via-rose-500/20 to-amber-400/20 blur-xl opacity-70 -z-10" />
           {book.coverUrl ? (
             <img
               src={book.coverUrl}
               alt={book.title}
-              className="w-full rounded-2xl shadow-md"
-              style={{ boxShadow: "var(--shadow-editorial-md)" }}
+              className="w-full rounded-3xl shadow-2xl ring-1 ring-black/5 dark:ring-white/10"
             />
           ) : (
             <div
-              className="flex aspect-[2/3] items-center justify-center rounded-2xl"
+              className="flex aspect-[2/3] w-full items-center justify-center rounded-3xl shadow-2xl"
               style={{
                 background: "linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%)",
-                boxShadow: "var(--shadow-editorial-md)",
               }}
             >
               <span
-                className="text-5xl text-white/90"
-                style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
+                className="text-6xl text-white font-bold drop-shadow-lg"
+                style={{ fontFamily: "var(--font-display)" }}
               >
                 {book.title[0]?.toUpperCase()}
               </span>
@@ -121,37 +129,38 @@ export function BookDetails() {
           )}
         </div>
 
-        {/* ── Book details panel ── */}
-        <div className="glass flex min-w-0 flex-1 flex-col gap-5 rounded-3xl p-7">
+        {/* ── Book Details Glass Card ── */}
+        <div className="glass flex min-w-0 flex-1 flex-col gap-6 rounded-[32px] p-6 sm:p-8 md:p-10 shadow-xl">
 
-          {/* Title + Actions */}
+          {/* Header Row: Title & Quick Actions */}
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-2">
               <h1
-                className="text-3xl leading-tight"
+                className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl"
                 style={{
                   fontFamily: "var(--font-display)",
-                  fontWeight: 600,
                   color: "var(--color-ink)",
                 }}
               >
                 {book.title}
               </h1>
+
               {book.subtitle && (
                 <p
-                  className="text-base italic leading-snug"
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    color: "var(--color-ink-muted)",
-                  }}
+                  className="text-lg italic leading-snug font-medium text-slate-500 dark:text-slate-400"
+                  style={{ fontFamily: "var(--font-display)" }}
                 >
                   {book.subtitle}
                 </p>
               )}
+
+              <p className="text-base font-semibold text-violet-700 dark:text-violet-300">
+                {book.authors.length > 0 ? book.authors.join(", ") : "Autor desconhecido"}
+              </p>
             </div>
 
-            {/* Action buttons */}
-            <div className="flex shrink-0 items-center gap-1">
+            {/* Action Bar */}
+            <div className="flex shrink-0 items-center gap-2 pt-1">
               <ShelfManager
                 bookId={book.id}
                 bookTitle={book.title}
@@ -162,77 +171,73 @@ export function BookDetails() {
               <button
                 onClick={handleShare}
                 className={iconBtnClass}
-                title="Share"
-                style={{ color: "var(--color-ink-muted)" }}
+                title="Compartilhar livro"
               >
-                <ShareIcon className="size-4" />
+                <ShareIcon className="size-5 text-sky-500" />
               </button>
               <a
                 href={amazonUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={iconBtnClass}
-                title="Buy on Amazon"
-                style={{ color: "var(--color-ink-muted)" }}
+                title="Comprar na Amazon"
               >
-                <ShoppingCartIcon className="size-4" />
+                <ShoppingCartIcon className="size-5 text-amber-500" />
               </a>
             </div>
           </div>
 
-          {/* Author & year */}
-          <p className="text-sm font-medium" style={{ color: "var(--color-ink-muted)" }}>
-            {book.authors.join(", ")}
-            {year && <span> · {year}</span>}
-          </p>
+          {/* Rating & Metadata Badges */}
+          <div className="flex flex-wrap items-center gap-4 py-1 border-y border-slate-200/60 dark:border-white/10">
+            <StarRating rating={book.averageRating} count={book.ratingsCount} />
 
-          {/* Rating */}
-          <StarRating rating={book.averageRating} count={book.ratingsCount} />
+            <div className="flex flex-wrap gap-2">
+              {book.categories[0] && (
+                <span className="rounded-full bg-violet-500/15 border border-violet-500/20 px-3.5 py-1 text-xs font-bold text-violet-700 dark:text-violet-300">
+                  {book.categories[0]}
+                </span>
+              )}
 
-          {/* Metadata pills */}
-          <div className="flex flex-wrap gap-2">
-            {book.categories[0] && (
-              <span
-                className="rounded-full px-3 py-1 text-xs font-medium"
-                style={{
-                  background: "var(--color-accent-soft)",
-                  color: "var(--color-accent-light)",
-                }}
-              >
-                {book.categories[0]}
-              </span>
-            )}
-            {book.pageCount && (
-              <span
-                className="rounded-full px-3 py-1 text-xs font-medium"
-                style={{
-                  background: "var(--color-paper-sunken)",
-                  color: "var(--color-ink-muted)",
-                }}
-              >
-                {book.pageCount} pages
-              </span>
-            )}
+              {book.pageCount && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-500/10 border border-slate-500/15 px-3.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <BookOpenIcon className="size-3.5" />
+                  {book.pageCount} páginas
+                </span>
+              )}
+
+              {year && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-500/10 border border-slate-500/15 px-3.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <CalendarIcon className="size-3.5" />
+                  {year}
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* Description */}
+          {/* Sinopse / Description */}
           {description && (
-            <p
-              className="mt-1 text-sm leading-relaxed"
-              style={{ color: "var(--color-ink-muted)" }}
-            >
-              {description}
-            </p>
+            <div className="flex flex-col gap-2">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Sinopse
+              </h3>
+              <p
+                className="text-base leading-relaxed font-normal text-slate-700 dark:text-slate-200"
+              >
+                {description}
+              </p>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Reading sessions timeline */}
-      <ReadingSessionTimeline
-        bookId={book.id}
-        userId={session?.user?.id}
-        refreshTrigger={refreshTrigger}
-      />
+      {/* Reading Sessions Timeline */}
+      <div className="mt-8">
+        <ReadingSessionTimeline
+          bookId={book.id}
+          userId={session?.user?.id}
+          refreshTrigger={refreshTrigger}
+        />
+      </div>
     </div>
   );
 }

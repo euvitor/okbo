@@ -3,6 +3,7 @@ import { ProfilePic } from "../components/ProfilePic";
 import { useProfile } from "../hooks/useProfile";
 import { supabase } from "../lib/supabaseClient";
 import { ShelfRow, type UserBookDetails } from "../components/ShelfRow";
+import { Share2, Download, LogOut, Target } from "lucide-react";
 
 async function handleLogout() {
   const { error } = await supabase.auth.signOut();
@@ -41,11 +42,13 @@ export function MyShelf() {
 
   if (!userId) {
     return (
-      <div
-        className="container flex items-center justify-center pt-20 text-sm animate-pulse"
-        style={{ color: "var(--color-ink-muted)" }}
-      >
-        Loading session…
+      <div className="container mx-auto flex items-center justify-center pt-24">
+        <div className="glass flex max-w-sm flex-col items-center gap-4 rounded-3xl p-10 text-center">
+          <div className="size-10 rounded-full border-3 border-violet-500 border-t-transparent animate-spin" />
+          <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+            Carregando sua estante...
+          </p>
+        </div>
       </div>
     );
   }
@@ -55,106 +58,121 @@ export function MyShelf() {
   const readList = userBooks.filter((b) => b.status === "read");
   const droppedList = userBooks.filter((b) => b.status === "dropped");
 
-  /* Shared action button style */
-  const actionBtnClass =
-    "w-full rounded-full py-2.5 text-sm font-medium transition-all duration-150 hover:opacity-80 active:scale-[0.98]";
+  const totalBooks = userBooks.length;
+  const readCount = readList.length;
+  const goalTarget = 24; // Default goal
+  const progressPercent = Math.min(Math.round((readCount / goalTarget) * 100), 100);
 
   return (
-    <div className="container grid grid-cols-1 gap-10 pb-20 pt-10 lg:grid-cols-3">
+    <div className="container mx-auto grid grid-cols-1 gap-8 pb-20 pt-6 lg:grid-cols-12">
 
-      {/* ── Sidebar ── */}
-      <aside className="mx-auto flex h-max w-full max-w-xs flex-col items-center gap-8 p-4 lg:col-span-1 lg:sticky lg:top-24">
-        {isLoading ? (
-          <div
-            className="h-36 w-36 animate-pulse rounded-full"
-            style={{ background: "var(--color-paper-sunken)" }}
-          />
-        ) : (
-          <>
-            <ProfilePic
-              userId={userId}
-              avatarUrl={profile.avatar_url}
-              onUploadSuccess={(newUrl) => updateLocalProfile({ avatar_url: newUrl })}
-            />
+      {/* ── Profile Sidebar ── */}
+      <aside className="mx-auto flex h-max w-full max-w-sm flex-col items-center gap-6 p-2 lg:col-span-4 lg:sticky lg:top-28">
+        <div className="glass flex w-full flex-col items-center gap-6 rounded-[32px] p-7 sm:p-8 shadow-xl">
+          {isLoading ? (
+            <div className="size-36 animate-pulse rounded-full bg-slate-200 dark:bg-neutral-800" />
+          ) : (
+            <>
+              <ProfilePic
+                userId={userId}
+                avatarUrl={profile.avatar_url}
+                onUploadSuccess={(newUrl) => updateLocalProfile({ avatar_url: newUrl })}
+              />
 
-            {/* Reading goal */}
-            <div className="glass w-full rounded-2xl p-5 flex flex-col gap-3">
-              <div className="flex items-baseline justify-between">
-                <h3
-                  className="text-sm font-semibold"
+              <div className="flex flex-col items-center text-center">
+                <h2
+                  className="text-2xl font-bold"
                   style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
                 >
-                  2026 Reading Goal
-                </h3>
-                <span className="text-xs font-medium" style={{ color: "var(--color-accent)" }}>
-                  65%
-                </span>
+                  {profile.username || "Leitor Okbo"}
+                </h2>
+                <p className="text-xs font-semibold text-violet-600 dark:text-violet-400">
+                  {totalBooks} {totalBooks === 1 ? "livro salvo" : "livros salvos"}
+                </p>
               </div>
 
-              {/* Progress bar */}
-              <div
-                className="relative h-1.5 w-full overflow-hidden rounded-full"
-                style={{ background: "var(--color-paper-sunken)" }}
-              >
-                <div
-                  className="absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out"
-                  style={{ width: "65%", background: "var(--color-accent)" }}
-                />
+              {/* Reading Goal Card with Gradient Progress Bar */}
+              <div className="w-full rounded-2xl bg-white/70 p-4 border border-white/80 shadow-inner dark:bg-neutral-800/60 dark:border-white/5 flex flex-col gap-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200">
+                    <Target className="size-4 text-violet-500" />
+                    <span>Meta de Leitura 2026</span>
+                  </div>
+                  <span className="text-xs font-bold text-violet-600 dark:text-violet-400">
+                    {readCount} de {goalTarget} livros ({progressPercent}%)
+                  </span>
+                </div>
+
+                {/* Gradient Progress Bar */}
+                <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-slate-200/70 dark:bg-neutral-700/60">
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out shadow-sm"
+                    style={{
+                      width: `${progressPercent}%`,
+                      background: "linear-gradient(90deg, #7C3AED 0%, #EC4899 50%, #10B981 100%)",
+                    }}
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Actions */}
-            <div className="flex w-full flex-col gap-2">
-              <button
-                className={actionBtnClass}
-                style={{
-                  background: "var(--color-paper-sunken)",
-                  color: "var(--color-ink-muted)",
-                }}
-              >
-                Share my bio
-              </button>
+              {/* Action Buttons */}
+              <div className="flex w-full flex-col gap-2.5 pt-1">
+                <button className="glass-pill flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-slate-700 hover:text-violet-600 dark:text-slate-200 dark:hover:text-violet-400">
+                  <Share2 className="size-4" />
+                  <span>Compartilhar Perfil</span>
+                </button>
 
-              <button
-                className={actionBtnClass}
-                style={{
-                  background: "var(--color-paper-sunken)",
-                  color: "var(--color-ink-muted)",
-                }}
-              >
-                Export my lists
-              </button>
+                <button className="glass-pill flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-slate-700 hover:text-violet-600 dark:text-slate-200 dark:hover:text-violet-400">
+                  <Download className="size-4" />
+                  <span>Exportar Estantes</span>
+                </button>
 
-              <button
-                onClick={handleLogout}
-                className={actionBtnClass}
-                style={{
-                  background: "rgba(220, 38, 38, 0.07)",
-                  color: "#DC2626",
-                }}
-              >
-                Logout
-              </button>
-            </div>
-          </>
-        )}
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-rose-600 transition-all hover:bg-rose-500/10 active:scale-95 dark:text-rose-400"
+                >
+                  <LogOut className="size-4" />
+                  <span>Encerrar Sessão</span>
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </aside>
 
-      {/* ── Shelves ── */}
-      <main className="flex min-h-125 flex-col gap-10 p-4 lg:col-span-2">
+      {/* ── Main Shelves Section ── */}
+      <main className="flex min-h-125 flex-col gap-10 p-2 lg:col-span-8">
         {isFetchingBooks ? (
-          <div
-            className="flex h-full w-full items-center justify-center text-sm animate-pulse"
-            style={{ color: "var(--color-ink-muted)" }}
-          >
-            Loading your shelves…
+          <div className="glass flex h-64 w-full flex-col items-center justify-center gap-3 rounded-3xl">
+            <div className="size-8 rounded-full border-3 border-violet-500 border-t-transparent animate-spin" />
+            <p className="text-sm font-semibold text-slate-500">Organizando suas leituras...</p>
           </div>
         ) : (
           <>
-            <ShelfRow title="Currently Reading" userBooks={readingList} />
-            <ShelfRow title="Want to Read" userBooks={wantToReadList} />
-            <ShelfRow title="Read" userBooks={readList} />
-            <ShelfRow title="Did Not Finish" userBooks={droppedList} />
+            <ShelfRow
+              title="Lendo Agora"
+              badgeColor="bg-violet-500/15 text-violet-700 border-violet-500/20"
+              icon="📖"
+              userBooks={readingList}
+            />
+            <ShelfRow
+              title="Quero Ler"
+              badgeColor="bg-amber-500/15 text-amber-700 border-amber-500/20"
+              icon="✨"
+              userBooks={wantToReadList}
+            />
+            <ShelfRow
+              title="Lidos"
+              badgeColor="bg-emerald-500/15 text-emerald-700 border-emerald-500/20"
+              icon="🏆"
+              userBooks={readList}
+            />
+            <ShelfRow
+              title="Abandonados"
+              badgeColor="bg-rose-500/15 text-rose-700 border-rose-500/20"
+              icon="💤"
+              userBooks={droppedList}
+            />
           </>
         )}
       </main>
